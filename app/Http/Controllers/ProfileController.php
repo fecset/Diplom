@@ -2,45 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function edit(Request $request)
     {
-        // ... existing code ...
+        return view('profile.edit', ['user' => $request->user()]);
     }
 
-    /**
-     * Download certificate.
-     */
+    public function update(Request $request)
+    {
+        $data = $request->validate(['email' => ['nullable', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)], 'phone_number' => 'nullable|string|max:20', 'password' => 'nullable|string|min:8|confirmed', 'current_password' => 'required_with:password|current_password']);
+        unset($data['current_password']);
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+        $request->user()->update($data);
+
+        return back()->with('success', 'Профиль обновлён.');
+    }
+
     public function downloadCertificate(Request $request)
     {
-        $user = $request->user();
-        
-        // Загружаем связанные данные пользователя (должность и отдел)
-        $user->load(['position', 'department']);
+        $user = $request->user()->load(['position', 'department']);
 
-        // Добавляем отладочную информацию
-        Log::info('User data for certificate:', [
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'full_name' => $user->full_name ?? 'N/A', // Проверяем full_name
-            'position' => $user->position?->name,
-            'department' => $user->department?->name,
-        ]);
-
-        // Генерируем PDF из представления
-        $pdf = Pdf::loadView('certificates.work_certificate', compact('user'));
-
-        // Возвращаем PDF для скачивания
-        return $pdf->download('spravka_s_mesta_raboty_' . $user->id . '.pdf');
+        return Pdf::loadView('certificates.work_certificate', compact('user'))->download('spravka_s_mesta_raboty_'.$user->id.'.pdf');
     }
 }

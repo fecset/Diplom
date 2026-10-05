@@ -2,97 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
+use App\Models\Department;
+use App\Models\LeaveRequest;
+use App\Models\Position;
 use App\Models\User;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AttendanceController extends Controller
 {
-    // Просмотр табеля за период (по умолчанию текущий месяц)
     public function index(Request $request)
     {
-        $date = $request->get('date', now()->format('Y-m'));
-        $start = Carbon::parse($date.'-01')->startOfMonth();
-        $end = (clone $start)->endOfMonth();
-
-        $query = User::with('department')
-            ->join('departments', 'users.department_id', '=', 'departments.id')
-            ->orderBy('departments.name')
-            ->orderBy('users.name')
-            ->select('users.*');
-
-        // Если пользователь не админ и не HR, показываем только сотрудников его отдела
-        if (!Auth::user()->isAdmin() && !Auth::user()->isHrSpecialist()) {
-            $query->where('users.department_id', Auth::user()->department_id);
+        $request->validate(['date' => 'nullable|date_format:Y-m', 'name' => 'nullable|string|max:255', 'department' => 'nullable|integer|exists:departments,id', 'position' => 'nullable|integer|exists:positions,id']);
+        $date = $request->input('date', now()->format('Y-m'));
+        $start = CarbonImmutable::createFromFormat('!Y-m-d', $date.'-01');
+        $end = $start->endOfMonth();
+        $query = User::with(['department', 'position'])->leftJoin('departments', 'users.department_id', '=', 'departments.id')->select('users.*')->orderBy('departments.name')->orderBy('users.name');
+        if (! $request->user()->isAdmin() && ! $request->user()->isHrSpecialist()) {
+            $request->user()->department_id ? $query->where('users.department_id', $request->user()->department_id) : $query->where('users.id', $request->user()->id);
         }
-        
-        $users = $query->get();
-        
-        // Устанавливаем явку на текущий день для всех пользователей, если нет записи
-        $today = Carbon::today()->format('Y-m-d');
-        $currentMonth = Carbon::today()->format('Y-m');
-        
-        // Проверяем, что выбранный месяц - текущий
-        if ($date === $currentMonth) {
-            $this->setDefaultAttendanceForToday($users, $today);
+        if ($request->filled('name')) {
+            $query->where('users.name', 'like', '%'.$request->name.'%');
         }
-        
-        $attendances = Attendance::whereBetween('date', [$start, $end])->get()->groupBy(['user_id', 'date']);
+        if ($request->filled('department')) {
+            $query->where('users.department_id', $request->department);
+        }
+        if ($request->filled('position')) {
+            $query->where('users.position_id', $request->position);
+        }
+        $departments = Department::orderBy('name')->get();
+        $positions = Position::orderBy('name')->get();
+        $users = $query->paginate(10)->withQueryString();
+        $attendances = Attendance::whereIn('user_id', $users->getCollection()->modelKeys())->whereBetween('date', [$start->toDateString(), $end->toDateString()])->get()->groupBy(['user_id', 'date']);
 
-        return view('attendances.index', compact('users', 'attendances', 'start', 'end'));
+        return view('attendances.index', compact('users', 'attendances', 'start', 'end', 'departments', 'positions'));
     }
 
-    // Сохранение/редактирование явки (HR/админ)
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'date' => 'required|date',
-            'status' => 'required|in:present,absent,vacation,sick_leave',
-            'comment' => 'nullable|string|max:255',
-        ]);
-
-        Attendance::updateOrCreate(
-            [
-                'user_id' => $request->user_id,
-                'date' => $request->date,
-            ],
-            [
-                'status' => $request->status,
-                'comment' => $request->comment,
-            ]
-        );
-
-        return back()->with('success', 'Данные успешно сохранены!');
-    }
-    
-    /**
-     * Устанавливает статус "present" (явка) для всех пользователей на сегодняшний день,
-     * если у них нет записи на этот день.
-     *
-     * @param \Illuminate\Database\Eloquent\Collection $users Коллекция пользователей
-     * @param string $today Текущая дата в формате Y-m-d
-     * @return void
-     */
-    private function setDefaultAttendanceForToday($users, $today)
-    {
-        foreach ($users as $user) {
-            // Проверяем, существует ли запись для пользователя на сегодня
-            $attendance = Attendance::where('user_id', $user->id)
-                ->where('date', $today)
-                ->first();
-            
-            // Если записи нет, создаем с статусом "present"
-            if (!$attendance) {
-                Attendance::create([
-                    'user_id' => $user->id,
-                    'date' => $today,
-                    'status' => 'present', // Устанавливаем статус "явка" по умолчанию
-                    'comment' => null,
-                ]);
+        $data = $request->validate(['user_id' => ['required', Rule::exists('users', 'id')->whereNull('deleted_at')], 'date' => 'required|date_format:Y-m-d', 'status' => 'required|in:present,absent,vacation,sick_leave', 'comment' => 'nullable|string|max:255']);
+        DB::transaction(function () use ($data) {
+            User::whereKey($data['user_id'])->lockForUpdate()->firstOrFail();
+            $leave = LeaveRequest::where('user_id', $data['user_id'])->where('status', 'approved')->where('date_start', '<=', $data['date'])->where('date_end', '>=', $data['date'])->first();
+            if ($leave) {
+                $expected = match ($leave->type) {
+                    'vacation' => 'vacation','sick_leave' => 'sick_leave',default => 'present'
+                };
+                if ($expected !== $data['status']) {
+                    throw ValidationException::withMessages(['status' => 'Отметка противоречит одобренной заявке.']);
+                }
             }
-        }
+            Attendance::updateOrCreate(['user_id' => $data['user_id'], 'date' => $data['date']], ['status' => $data['status'], 'comment' => $data['comment'] ?? null]);
+        }, 3);
+
+        return back()->with('success', 'Данные сохранены.');
+    }
+
+    public function update(Request $request, Attendance $attendance)
+    {
+        // Resource identity takes precedence over submitted identity.
+        $request->merge(['user_id' => $attendance->user_id, 'date' => $attendance->date]);
+
+        return $this->store($request);
     }
 }

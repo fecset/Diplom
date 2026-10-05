@@ -10,6 +10,7 @@
         <div class="card-body">
             <form method="POST" action="{{ route('notifications.store') }}">
                 @csrf
+                <input type="hidden" name="audience_present" value="1">
                 
                 <div class="form-group">
                     <label for="title">Заголовок уведомления <span class="text-danger">*</span></label>
@@ -69,6 +70,10 @@
                 
                 <div id="target-section" class="{{ old('is_global') ? 'd-none' : '' }}">
                     <h4 class="mt-4 mb-3">Целевая аудитория</h4>
+                    <label for="targetUsers">Отдельные сотрудники (можно выбрать несколько)</label>
+                    <select id="targetUsers" name="target_users[]" multiple class="form-control">
+                    @foreach($users as $recipient)<option value="{{ $recipient->id }}" @selected(in_array($recipient->id, old('target_users', [])))>{{ $recipient->name }} ({{ $recipient->username }})</option>@endforeach
+                    </select>
                     
                     <div class="card mb-3">
                         <div class="card-header">Роли пользователей</div>

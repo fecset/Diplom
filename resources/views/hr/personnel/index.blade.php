@@ -16,40 +16,36 @@
             </a>
         </div>
         
-        <div class="personnel__filters">
+        <form method="GET" action="{{ route('hr.personnel.index') }}" class="personnel__filters">
             <div class="personnel__filter-group">
                 <label for="filterDepartment" class="personnel__filter-label">Отдел:</label>
-                <select id="filterDepartment" class="personnel__filter-select">
+                <select id="filterDepartment" name="department" class="personnel__filter-select">
                     <option value="">Все отделы</option>
-                    @php
-                        $departments = $employees->pluck('department')->filter()->unique('id')->sortBy('name')->values();
-                    @endphp
+
                     @foreach($departments as $department)
-                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        <option value="{{ $department->id }}" @selected(request('department') == $department->id)>{{ $department->name }}</option>
                     @endforeach
                 </select>
             </div>
             
             <div class="personnel__filter-group">
                 <label for="filterPosition" class="personnel__filter-label">Должность:</label>
-                <select id="filterPosition" class="personnel__filter-select">
+                <select id="filterPosition" name="position" class="personnel__filter-select">
                     <option value="">Все должности</option>
-                    @php
-                        $positions = $employees->pluck('position')->filter()->unique('id')->sortBy('name')->values();
-                    @endphp
+
                     @foreach($positions as $position)
-                        <option value="{{ $position->id }}">{{ $position->name }}</option>
+                        <option value="{{ $position->id }}" @selected(request('position') == $position->id)>{{ $position->name }}</option>
                     @endforeach
                 </select>
             </div>
             
             <div class="personnel__filter-group">
                 <label for="filterName" class="personnel__filter-label">Поиск по имени:</label>
-                <input type="text" id="filterName" class="personnel__filter-input" placeholder="Введите имя...">
+                <input type="text" id="filterName" name="name" value="{{ request('name') }}" class="personnel__filter-input" placeholder="Введите имя...">
             </div>
             
-            <a type="button" id="resetFilters" class=" personnel__filter-reset">Сбросить</a>
-        </div>
+            <button type="submit" class="btn">Найти</button><a href="{{ route('hr.personnel.index') }}" class="personnel__filter-reset">Сбросить</a>
+        </form>
         
         <div id="noResultsMessage" class="personnel__no-results" style="display: none;">
             <p>Сотрудники не найдены. Попробуйте изменить параметры поиска.</p>
@@ -59,14 +55,14 @@
             <table class="personnel__table" id="personnelTable">
                 <thead>
                     <tr>
-                        <th data-sort="name">ФИО <span class="personnel__sort-icon">↕</span></th>
-                        <th data-sort="position">Должность <span class="personnel__sort-icon">↕</span></th>
-                        <th data-sort="department">Отдел <span class="personnel__sort-icon">↕</span></th>
+                        <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'name','order'=>($sortField==='name' && $sortOrder==='asc')?'desc':'asc'])) }}">ФИО <span class="personnel__sort-icon">↕</span></a></th>
+                        <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'position','order'=>($sortField==='position' && $sortOrder==='asc')?'desc':'asc'])) }}">Должность <span class="personnel__sort-icon">↕</span></a></th>
+                        <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'department','order'=>($sortField==='department' && $sortOrder==='asc')?'desc':'asc'])) }}">Отдел <span class="personnel__sort-icon">↕</span></a></th>
                         <th>Логин</th>
                         <th>Телефон</th>
                         <th>Email</th>
-                        <th data-sort="role">Роль <span class="personnel__sort-icon">↕</span></th>
-                        <th data-sort="hired_at">Дата приёма <span class="personnel__sort-icon">↕</span></th>
+                        <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'role','order'=>($sortField==='role' && $sortOrder==='asc')?'desc':'asc'])) }}">Роль <span class="personnel__sort-icon">↕</span></a></th>
+                        <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'hired_at','order'=>($sortField==='hired_at' && $sortOrder==='asc')?'desc':'asc'])) }}">Дата приёма <span class="personnel__sort-icon">↕</span></a></th>
                         <th>Действия</th>
                     </tr>
                 </thead>
@@ -140,268 +136,8 @@
     </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    initPersonnelFiltering();
-    setupPaginationLinks();
-    
-    // Устанавливаем сортировку на основе данных из контроллера
-    @if(isset($sortField) && isset($sortOrder))
-    const sortField = '{{ $sortField }}';
-    const sortOrder = '{{ $sortOrder }}';
-    
-    if (sortField && sortOrder) {
-        const header = document.querySelector(`th[data-sort="${sortField}"]`);
-        if (header) {
-            const icon = header.querySelector('.personnel__sort-icon');
-            icon.textContent = sortOrder === 'asc' ? '↑' : '↓';
-            icon.classList.add('personnel__sort-icon--active');
-            
-            // Установим текущие параметры сортировки в объект currentSort
-            if (window.personnelCurrentSort) {
-                window.personnelCurrentSort.field = sortField;
-                window.personnelCurrentSort.order = sortOrder;
-            }
-        }
-    }
-    @else
-    // Устанавливаем сортировку из URL при загрузке страницы
-    const urlParams = new URLSearchParams(window.location.search);
-    const sortField = urlParams.get('sort');
-    const sortOrder = urlParams.get('order');
-    
-    if (sortField && sortOrder) {
-        const header = document.querySelector(`th[data-sort="${sortField}"]`);
-        if (header) {
-            const icon = header.querySelector('.personnel__sort-icon');
-            icon.textContent = sortOrder === 'asc' ? '↑' : '↓';
-            icon.classList.add('personnel__sort-icon--active');
-        }
-    }
-    @endif
-});
 
-function initPersonnelFiltering() {
-    const table = document.getElementById('personnelTable');
-    const rows = Array.from(table.querySelectorAll('tbody tr.personnel__data-row'));
-    const filterDepartment = document.getElementById('filterDepartment');
-    const filterPosition = document.getElementById('filterPosition');
-    const filterName = document.getElementById('filterName');
-    const resetButton = document.getElementById('resetFilters');
-    const sortableHeaders = document.querySelectorAll('th[data-sort]');
-    
-    // Текущие параметры сортировки
-    window.personnelCurrentSort = {
-        field: '{{ $sortField ?? 'name' }}',
-        order: '{{ $sortOrder ?? 'asc' }}'
-    };
-    
-    // Создаем массив данных для Fuse.js
-    const searchData = rows.map(row => {
-        return {
-            element: row,
-            name: row.getAttribute('data-name'),
-            department: row.getAttribute('data-department'),
-            position: row.getAttribute('data-position'),
-            role: row.getAttribute('data-role'),
-            hired_at: row.getAttribute('data-hired_at')
-        };
-    });
-    
-    // Настройки Fuse.js
-    const fuseOptions = {
-        keys: ['name'],
-        threshold: 0.3,
-        includeScore: true,
-        shouldSort: false
-    };
-    
-    // Инициализация Fuse.js
-    const fuse = new Fuse(searchData, fuseOptions);
-    
-    // Функция фильтрации и сортировки
-    function filterAndSortTable() {
-        // Фильтрация
-        const nameFilter = filterName.value.trim().toLowerCase();
-        const departmentFilter = filterDepartment.value;
-        const positionFilter = filterPosition.value;
-        
-        // Управление пагинацией - скрываем при активном фильтре
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (nameFilter || departmentFilter || positionFilter) {
-            if (paginationContainer) paginationContainer.style.display = 'none';
-        } else {
-            if (paginationContainer) paginationContainer.style.display = '';
-        }
-        
-        // Скрываем все строки перед фильтрацией
-        rows.forEach(row => {
-            row.style.display = 'none';
-        });
-        
-        // Получаем результаты поиска
-        let filteredData = searchData;
-        
-        // Применяем поиск по имени, если введен текст
-        if (nameFilter) {
-            const searchResults = fuse.search(nameFilter);
-            filteredData = searchResults.map(result => result.item);
-        }
-        
-        // Фильтруем по отделу, если выбран
-        if (departmentFilter) {
-            filteredData = filteredData.filter(item => item.department === departmentFilter);
-        }
-        
-        // Фильтруем по должности, если выбрана
-        if (positionFilter) {
-            filteredData = filteredData.filter(item => item.position === positionFilter);
-        }
-        
-        // Отображаем отфильтрованные строки
-        const visibleRows = filteredData.map(item => item.element);
-        
-        visibleRows.forEach(row => {
-            row.style.display = '';
-        });
-        
-        // Сортируем видимые строки
-        visibleRows.sort((a, b) => {
-            let aValue = a.getAttribute(`data-${window.personnelCurrentSort.field}`);
-            let bValue = b.getAttribute(`data-${window.personnelCurrentSort.field}`);
-            
-            // Специальная обработка для даты приема
-            if (window.personnelCurrentSort.field === 'hired_at') {
-                // Сортировка по дате
-                const dateA = aValue !== '9999-12-31' ? new Date(aValue) : new Date(9999, 11, 31);
-                const dateB = bValue !== '9999-12-31' ? new Date(bValue) : new Date(9999, 11, 31);
-                
-                if (window.personnelCurrentSort.order === 'asc') {
-                    return dateA - dateB;
-                } else {
-                    return dateB - dateA;
-                }
-            }
-            
-            // Специальная обработка для роли (кастомный порядок)
-            if (window.personnelCurrentSort.field === 'role') {
-                // Определяем порядок отображения ролей
-                const roleOrder = { 'admin': 1, 'hr_specialist': 2, 'employee': 3 };
-                
-                if (window.personnelCurrentSort.order === 'asc') {
-                    return roleOrder[aValue] - roleOrder[bValue];
-                } else {
-                    return roleOrder[bValue] - roleOrder[aValue];
-                }
-            }
-            
-            // Стандартная сортировка для текстовых полей
-            if (window.personnelCurrentSort.order === 'asc') {
-                return aValue.localeCompare(bValue);
-            } else {
-                return bValue.localeCompare(aValue);
-            }
-        });
-        
-        // Переупорядочиваем строки в таблице
-        const tbody = table.querySelector('tbody');
-        visibleRows.forEach(row => tbody.appendChild(row));
-        
-        // Обновляем индикаторы сортировки
-        updateSortIcons();
-        
-        // Показываем сообщение, если ничего не найдено
-        const noResults = document.getElementById('noResultsMessage');
-        if (noResults) {
-            if (visibleRows.length === 0) {
-                noResults.style.display = 'block';
-            } else {
-                noResults.style.display = 'none';
-            }
-        }
-    }
-    
-    // Сортировка при клике на заголовки
-    sortableHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-            const field = this.getAttribute('data-sort');
-            
-            // Если кликнули на текущее поле сортировки - меняем порядок
-            if (window.personnelCurrentSort.field === field) {
-                window.personnelCurrentSort.order = window.personnelCurrentSort.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                // Иначе устанавливаем новое поле сортировки
-                window.personnelCurrentSort.field = field;
-                window.personnelCurrentSort.order = 'asc';
-            }
-            
-            // Обновляем таблицу
-            filterAndSortTable();
-        });
-    });
-    
-    function updateSortIcons() {
-        sortableHeaders.forEach(header => {
-            const field = header.getAttribute('data-sort');
-            const icon = header.querySelector('.personnel__sort-icon');
-            
-            if (field === window.personnelCurrentSort.field) {
-                icon.textContent = window.personnelCurrentSort.order === 'asc' ? '↑' : '↓';
-                icon.classList.add('personnel__sort-icon--active');
-            } else {
-                icon.textContent = '↕';
-                icon.classList.remove('personnel__sort-icon--active');
-            }
-        });
-    }
-    
-    // Привязываем обработчики событий
-    filterDepartment.addEventListener('change', filterAndSortTable);
-    filterPosition.addEventListener('change', filterAndSortTable);
-    
-    // Установка debounce для поиска по имени
-    let searchTimeout;
-    filterName.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterAndSortTable, 300);
-    });
-    
-    // Сброс фильтров
-    resetButton.addEventListener('click', function() {
-        filterDepartment.value = '';
-        filterPosition.value = '';
-        filterName.value = '';
-        
-        filterAndSortTable();
-    });
-    
-    // Запускаем первичную сортировку
-    filterAndSortTable();
-}
 
-// Добавляем обработчик для сохранения параметров сортировки при переходе по страницам
-function setupPaginationLinks() {
-    const paginationLinks = document.querySelectorAll('.personnel__pagination .pagination a');
-    
-    paginationLinks.forEach(link => {
-        const url = new URL(link.href);
-        if (window.personnelCurrentSort) {
-            url.searchParams.set('sort', window.personnelCurrentSort.field);
-            url.searchParams.set('order', window.personnelCurrentSort.order);
-        } else {
-            const activeIcon = document.querySelector('.personnel__sort-icon--active');
-            const currentSort = {
-                field: activeIcon?.parentNode?.getAttribute('data-sort') || 'name',
-                order: activeIcon?.textContent === '↑' ? 'asc' : 'desc'
-            };
-            url.searchParams.set('sort', currentSort.field);
-            url.searchParams.set('order', currentSort.order);
-        }
-        link.href = url.toString();
-    });
-}
-</script>
 
 <style>
 .personnel {

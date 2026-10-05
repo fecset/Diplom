@@ -1,0 +1,51 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const menu=document.getElementById('menuToggle'), sidebar=document.getElementById('sidebar');
+    const closeMenu=()=>{sidebar?.classList.remove('active');menu?.classList.remove('active');menu?.setAttribute('aria-expanded','false');document.body.classList.remove('menu-open');};
+    menu?.addEventListener('click',()=>{if(!sidebar)return;const open=!sidebar.classList.contains('active');sidebar.classList.toggle('active',open);menu.classList.toggle('active',open);menu.setAttribute('aria-expanded',String(open));document.body.classList.toggle('menu-open',open);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+    document.addEventListener('click',e=>{if(sidebar&&!sidebar.contains(e.target)&&!menu.contains(e.target))closeMenu();});
+    window.addEventListener('resize',()=>{if(window.innerWidth>900)closeMenu();});
+    const attendance=document.getElementById('attendanceDialog');
+    document.querySelectorAll('.attendance-edit').forEach(button=>button.addEventListener('click',()=>{
+        for(const field of ['user_id','date','status','comment']) attendance.querySelector(`[name="${field}"]`).value=button.dataset[field==='user_id'?'user':field]||'';
+        document.getElementById('attendanceDialogTitle').textContent=`${button.dataset.name}: ${button.dataset.date}`;
+        attendance.showModal();
+    }));
+    document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
+    const trigger=document.getElementById('notificationsIcon'), badge=document.getElementById('notificationsBadge');
+    if(!trigger)return;
+    const request=async(url, options={})=>{const response=await fetch(url,{credentials:'same-origin',headers:{'Accept':'application/json',...options.headers},...options});if(!response.ok)throw new Error('Не удалось выполнить запрос.');return response.json();};
+    const setBadge=count=>{badge.textContent=String(count);badge.classList.toggle('has-notifications',count>0);trigger.setAttribute('aria-label',`Уведомления: ${count} непрочитанных`);};
+    const refresh=async()=>setBadge((await request(trigger.dataset.url)).unread_count);
+    refresh().catch(()=>{badge.textContent='!';trigger.setAttribute('aria-label','Уведомления: ошибка загрузки');});
+    const element=(tag,text,cls)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;};
+    trigger.addEventListener('click',async()=>{
+        const dialog=element('dialog',undefined,'review-dialog notification-dialog');dialog.setAttribute('aria-labelledby','notificationDialogTitle');
+        const title=element('h2','Уведомления');title.id='notificationDialogTitle';dialog.append(title);
+        const close=element('button','Закрыть');close.type='button';close.addEventListener('click',()=>dialog.close());dialog.append(close);
+        const all=element('button','Прочитать все');all.type='button';dialog.append(all);
+        const status=element('p','Загрузка…');status.setAttribute('role','status');dialog.append(status);
+        const body=element('div',undefined,'notification-modal__body');dialog.append(body);
+        const more=element('button','Показать ещё');more.type='button';more.hidden=true;dialog.append(more);
+        let next=null;
+        const mark=async(ids)=>{await request(trigger.dataset.readUrl,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(ids?{notification_ids:ids}:{})});await refresh();};
+        const load=async(url)=>{
+            status.textContent='Загрузка…';more.disabled=true;
+            try {
+                const data=await request(url);setBadge(data.unread_count);
+                data.data.forEach(item=>{
+                    const article=element('article',undefined,'notification-item'+(item.is_read?' notification-item--read':''));
+                    const content=element('div',undefined,'notification-item__content');
+                    content.append(element('h3',item.title,'notification-item__title'),element('p',item.message,'notification-item__text'),element('time',new Date(item.created_at).toLocaleString('ru-RU'),'notification-item__date'));
+                    article.append(content);
+                    if(!item.is_read){const read=element('button','Прочитать');read.type='button';read.dataset.markRead='true';read.addEventListener('click',async()=>{read.disabled=true;try{await mark([item.id]);article.classList.add('notification-item--read');read.remove();}catch(e){status.textContent=e.message;read.disabled=false;}});article.append(read);}
+                    body.append(article);
+                });
+                next=data.next_page_url;more.hidden=!next;status.textContent=body.childElementCount?'':'У вас нет уведомлений.';
+            }catch(e){status.textContent=e.message;}finally{more.disabled=false;}
+        };
+        more.addEventListener('click',()=>{if(next)load(next);});
+        all.addEventListener('click',async()=>{all.disabled=true;try{await mark();body.querySelectorAll('.notification-item').forEach(n=>n.classList.add('notification-item--read'));body.querySelectorAll('[data-mark-read]').forEach(n=>n.remove());}catch(e){status.textContent=e.message;}finally{all.disabled=false;}});
+        dialog.addEventListener('close',()=>{dialog.remove();trigger.focus();});document.body.append(dialog);dialog.showModal();await load(trigger.dataset.url);
+    });
+});

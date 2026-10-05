@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use App\Models\LeaveRequest;
+use App\Services\LeaveWorkflow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\LeaveRequest;
-use App\Models\User;
-use Carbon\Carbon;
-use App\Models\Notification;
-use App\Models\Department;
 
 class HrLeaveRequestController extends Controller
 {
@@ -26,7 +24,8 @@ class HrLeaveRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $query = LeaveRequest::with('user')->orderBy('created_at', 'desc');
+        $request->validate(['name' => 'nullable|string|max:255', 'department' => 'nullable|integer|exists:departments,id', 'date_from' => 'nullable|date_format:Y-m-d', 'date_to' => 'nullable|date_format:Y-m-d']);
+        $query = LeaveRequest::with(['user.department', 'user.position'])->orderBy('created_at', 'desc');
 
         // Фильтрация по типу заявки
         if ($request->has('type') && in_array($request->type, ['vacation', 'sick_leave', 'business_trip'])) {
@@ -40,15 +39,15 @@ class HrLeaveRequestController extends Controller
 
         // Фильтрация по имени сотрудника
         if ($request->has('name') && $request->name) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->name . '%');
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->name.'%');
             });
         }
 
         // Фильтрация по департаменту
         if ($request->has('department') && $request->department) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('department', $request->department);
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('department_id', $request->department);
             });
         }
 
@@ -61,12 +60,13 @@ class HrLeaveRequestController extends Controller
             $query->where('date_end', '<=', $request->date_to);
         }
 
-        $requests = $query->paginate(20);
+        $requests = $query->paginate(20)->withQueryString();
+        $pendingCount = LeaveRequest::where('status', 'new')->count();
 
         // Получаем список всех отделов для фильтра через связь с таблицей departments
         $departments = Department::orderBy('name')->get();
 
-        return view('hr.leave_requests.index', compact('requests', 'departments'));
+        return view('hr.leave_requests.index', compact('requests', 'departments', 'pendingCount'));
     }
 
     /**
@@ -75,6 +75,7 @@ class HrLeaveRequestController extends Controller
     public function show(LeaveRequest $leaveRequest)
     {
         $leaveRequest->load(['user.position', 'user.department']);
+
         return view('hr.leave_requests.show', compact('leaveRequest'));
     }
 
@@ -91,31 +92,12 @@ class HrLeaveRequestController extends Controller
         // Проверяем, не пытается ли пользователь одобрить свою собственную заявку
         $currentUser = Auth::user();
 
-        if ($leaveRequest->user_id === $currentUser->id && !$currentUser->isAdmin()) {
+        if ($leaveRequest->user_id === $currentUser->id && ! $currentUser->isAdmin()) {
             return redirect()->route('hr.leave_requests.index')
                 ->with('error', 'Вы не можете одобрять или отклонять свои собственные заявки. Это может сделать только администратор.');
         }
 
-        $oldStatus = $leaveRequest->status;
-        $leaveRequest->status = $request->status;
-        $leaveRequest->hr_comment = $request->hr_comment;
-        $leaveRequest->save();
-
-        // Создаем уведомление об изменении статуса заявки
-        $notification = new Notification();
-        $notification->title = 'Обновление статуса заявки';
-        $notification->message = sprintf(
-            'Ваша заявка на %s %s %s. %s',
-            $leaveRequest->type === 'vacation' ? 'отпуск' : ($leaveRequest->type === 'sick_leave' ? 'больничный' : 'командировка'),
-            $leaveRequest->date_start,
-            $request->status === 'approved' ? 'одобрена' : 'отклонена',
-            $request->hr_comment ? 'Комментарий HR: ' . $request->hr_comment : ''
-        );
-        $notification->type = $request->status === 'approved' ? 'info' : 'warning';
-        $notification->created_by = $currentUser->id;
-        $notification->is_global = false;
-        $notification->target_users = [$leaveRequest->user_id];
-        $notification->save();
+        app(LeaveWorkflow::class)->decide($leaveRequest, $currentUser, $request->status, $request->hr_comment);
 
         return redirect()->route('hr.leave_requests.index')
             ->with('success', 'Статус заявки успешно обновлен.');
@@ -127,6 +109,7 @@ class HrLeaveRequestController extends Controller
     public function vacations(Request $request)
     {
         $request->merge(['type' => 'vacation']);
+
         return $this->index($request);
     }
 
@@ -136,6 +119,7 @@ class HrLeaveRequestController extends Controller
     public function sickLeaves(Request $request)
     {
         $request->merge(['type' => 'sick_leave']);
+
         return $this->index($request);
     }
 
@@ -145,6 +129,7 @@ class HrLeaveRequestController extends Controller
     public function businessTrips(Request $request)
     {
         $request->merge(['type' => 'business_trip']);
+
         return $this->index($request);
     }
 
@@ -154,6 +139,7 @@ class HrLeaveRequestController extends Controller
     public function pending(Request $request)
     {
         $request->merge(['status' => 'new']);
+
         return $this->index($request);
     }
 }

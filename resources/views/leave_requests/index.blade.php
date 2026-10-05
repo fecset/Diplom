@@ -149,7 +149,7 @@
                             <td>{{ $req->created_at->format('d.m.Y H:i') }}</td>
                             <td>
                                 @if($req->document_path)
-                                <a href="{{ asset('storage/' . $req->document_path) }}" target="_blank" class="requests__document-link" title="Просмотреть документ">
+                                <a href="{{ route('leave_requests.document', $req) }}" target="_blank" class="requests__document-link" title="Просмотреть документ">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                         <polyline points="14 2 14 8 20 8"></polyline>

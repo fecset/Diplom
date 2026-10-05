@@ -485,28 +485,28 @@ main {
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     }
-    
+
     .sidebar.active {
         left: 0;
     }
-    
+
     .layout__main {
         margin-left: 0;
         width: 100%;
     }
-    
+
     .mobile-menu-toggle {
         display: block;
     }
-    
+
     nav .container {
         padding-left: 50px; /* Место для кнопки меню */
     }
-    
+
     nav .app-name a {
         font-size: 1.4rem;
     }
-    
+
     /* Корректировка контейнера */
     .container {
         width: 95%;
@@ -878,7 +878,7 @@ main {
 }
 
 /* Стили для всех ячеек таблицы */
-.attendance__table td, 
+.attendance__table td,
 .attendance__table th {
     width: 160px;
     min-width: 160px;
@@ -930,7 +930,7 @@ td.attendance__sticky-col {
 }
 
 /* Только заголовки sticky-колонок имеют еще более темный фон */
-th.attendance__sticky-col { 
+th.attendance__sticky-col {
     background: #e6e6e6; /* Более темный фон для заголовков */
     z-index: 4;
     font-weight: 700;
@@ -948,30 +948,30 @@ th.attendance__sticky-col {
 }
 
 /* Улучшенные цвета для разных статусов */
-.attendance__status--present { 
-    background: #c7f0d2; 
-    color: #1b5e20; 
+.attendance__status--present {
+    background: #c7f0d2;
+    color: #1b5e20;
 }
 
-.attendance__status--absent { 
-    background: #ffcdd2; 
-    color: #b71c1c; 
+.attendance__status--absent {
+    background: #ffcdd2;
+    color: #b71c1c;
 }
 
-.attendance__status--vacation { 
-    
-    background: #d1d9ff; 
-    color: #1a237e; 
+.attendance__status--vacation {
+
+    background: #d1d9ff;
+    color: #1a237e;
 }
 
-.attendance__status--sick_leave, 
-.attendance__status--sick { 
-    background: #ffe0b2; 
-    
-    color: #e65100; 
+.attendance__status--sick_leave,
+.attendance__status--sick {
+    background: #ffe0b2;
+
+    color: #e65100;
 }
 
-.attendance__status--empty { 
+.attendance__status--empty {
     color: var(--color-medium-gray);
     background: #f9f9f9;
     border: 1px dashed #e0e0e0;
@@ -1087,7 +1087,7 @@ th.attendance__sticky-col {
 }
 
 @media (max-width: 900px) {
-    .attendance__table td, 
+    .attendance__table td,
     .attendance__table th {
         width: 90px;
         min-width: 90px;
@@ -1269,11 +1269,11 @@ th.attendance__sticky-col {
         flex-direction: column;
         padding: 0.8rem;
     }
-    
+
     .attendance__filter-group {
         width: 100%;
     }
-    
+
     .attendance__filter-reset {
         margin-left: 0;
         width: 100%;
@@ -1374,34 +1374,34 @@ body.menu-open {
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
     }
-    
+
     .sidebar.active {
         left: 0;
     }
-    
+
     .layout__main {
         margin-left: 0;
         width: 100%;
     }
-    
+
     .mobile-menu-toggle {
         display: block;
     }
-    
+
     nav .container {
         padding-left: 50px;
     }
-    
+
     nav .app-name a {
         font-size: 1.4rem;
     }
-    
+
     /* Корректировка контейнера */
     .container {
         width: 95%;
         padding: calc(var(--spacing-unit) * 1);
     }
-} 
+}
 
 .leave-request-card__type--business_trip {
     background-color: #9C27B0;
@@ -1438,4 +1438,12 @@ body.menu-open {
 
 .btn--business-trip:hover {
     background-color: #7B1FA2;
-} 
+}
+/* Shared forms, keyboard focus and compact read-only attendance grid. */
+button.mobile-menu-toggle,button.notifications-icon{border:0;background:transparent;color:inherit;font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ca4b15;outline-offset:3px}
+.review-filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:20px 0}
+.review-form{display:grid;gap:12px;max-width:600px}.review-form input,.review-form select{padding:10px;border:1px solid #aaa;border-radius:5px}
+.review-scroll{overflow:auto}.review-table{width:100%;border-collapse:collapse;margin:20px 0}.review-table th,.review-table td{padding:12px;border:1px solid #ddd;text-align:left}.review-table th{background:#f7f7f7}
+.attendance-grid td{padding:3px;text-align:center}.attendance-edit{border:0;background:transparent;min-width:36px;min-height:36px;cursor:pointer}.attendance-status-vacation{background:#fff2c8}.attendance-status-sick_leave{background:#ffe1e1}.attendance-status-present{background:#e7f5e7}
+.review-dialog{border:1px solid #ddd;border-radius:12px;padding:24px;max-width:min(750px,90vw);max-height:85vh;overflow:auto}.review-dialog::backdrop{background:#0008}.notification-dialog{width:700px}.notification-dialog>button{margin:0 10px 10px 0}.notification-item__text{white-space:pre-wrap;overflow-wrap:anywhere}

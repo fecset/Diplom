@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException; // Для обработки ошибок валидации
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+
+ // Для обработки ошибок валидации
 
 class LoginController extends Controller
 {
     /**
      * Показать форму входа.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showLoginForm()
     {
@@ -22,30 +27,36 @@ class LoginController extends Controller
     /**
      * Обработать попытку входа.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
+            'username' => 'required|string|max:50',
+            'password' => 'required|string|max:1024',
         ], [
             'username.required' => 'Пожалуйста, введите логин сотрудника.',
             'password.required' => 'Пожалуйста, введите пароль.',
         ]);
 
+        // Hash prevents usernames/IP addresses appearing verbatim in cache keys.
+        $key = 'login:'.hash('sha256', mb_strtolower($request->username).'|'.$request->ip());
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            throw ValidationException::withMessages(['username' => 'Слишком много попыток. Повторите через '.RateLimiter::availableIn($key).' сек.']);
+        }
         $credentials = $request->only('username', 'password');
         $remember = $request->filled('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            RateLimiter::clear($key);
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));
         }
 
+        RateLimiter::hit($key, 60);
         throw ValidationException::withMessages([
             'username' => ['Неверный логин или пароль.'],
         ]);
@@ -54,8 +65,7 @@ class LoginController extends Controller
     /**
      * Выход пользователя из системы.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function logout(Request $request)
     {

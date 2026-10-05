@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Department;
 use App\Models\Notification;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class NotificationController extends Controller
 {
@@ -21,6 +23,7 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate(['title' => 'nullable|string|max:255', 'type' => 'nullable|in:info,warning,important', 'status' => 'nullable|in:active,inactive', 'is_global' => 'nullable|in:true,false']);
         $query = Notification::query();
 
         // Фильтрация по типу
@@ -31,55 +34,42 @@ class NotificationController extends Controller
         // Фильтрация по статусу
         if ($request->has('status')) {
             if ($request->status === 'active') {
-                $query->where(function($q) {
+                $query->where('is_active', true)->where(function ($q) {
                     $q->whereNull('end_date')
-                      ->orWhere('end_date', '>', now());
-                })->where(function($q) {
+                        ->orWhere('end_date', '>', now());
+                })->where(function ($q) {
                     $q->whereNull('start_date')
-                      ->orWhere('start_date', '<=', now());
+                        ->orWhere('start_date', '<=', now());
                 });
             } elseif ($request->status === 'inactive') {
-                $query->where(function($q) {
-                    $q->where('end_date', '<', now())
-                      ->orWhere('start_date', '>', now());
+                $query->where(function ($q) {
+                    $q->where('is_active', false)->orWhere('end_date', '<', now())
+                        ->orWhere('start_date', '>', now());
                 });
             }
         }
 
         // Фильтрация по глобальности
-        if ($request->has('is_global')) {
+        if ($request->filled('is_global')) {
             $query->where('is_global', $request->is_global === 'true');
         }
 
         // Фильтрация по заголовку
         if ($request->has('title') && $request->title) {
-            $query->where('title', 'like', '%' . $request->title . '%');
+            $query->where('title', 'like', '%'.$request->title.'%');
         }
 
         // Сортировка
         $sortField = $request->get('sort', 'created_at');
-        $sortOrder = $request->get('order', 'desc');
+        $sortOrder = $request->get('order', 'desc') === 'asc' ? 'asc' : 'desc';
         $allowedSortFields = ['title', 'type', 'created_at', 'start_date', 'end_date'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'created_at';
         }
         $query->orderBy($sortField, $sortOrder);
 
-        // Определяем, есть ли фильтры/поиск/сортировка
-        $hasFilters = $request->filled('type') || $request->filled('status') || $request->filled('is_global') || $request->filled('title');
-        $isDefaultSort = ($sortField === 'created_at' && $sortOrder === 'desc');
-        $showAll = $hasFilters || !$isDefaultSort;
-
-        if ($showAll && $request->has('page')) {
-            // Удаляем параметр page из URL и делаем редирект
-            $params = $request->except('page');
-            return redirect()->route('notifications.index', $params);
-        }
-        if ($showAll) {
-            $notifications = $query->get();
-        } else {
-            $notifications = $query->paginate(8)->withQueryString();
-        }
+        $showAll = false;
+        $notifications = $query->paginate(8)->withQueryString();
 
         return view('notifications.index', compact('notifications', 'sortField', 'sortOrder', 'showAll'));
     }
@@ -89,9 +79,9 @@ class NotificationController extends Controller
      */
     public function create()
     {
-        $departments = \App\Models\Department::orderBy('name')->get();
-                         
-        return view('notifications.create', compact('departments'));
+        $departments = Department::orderBy('name')->get();
+
+        return view('notifications.create', ['departments' => $departments, 'users' => User::orderBy('name')->get()]);
     }
 
     /**
@@ -101,15 +91,15 @@ class NotificationController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'message' => 'required|string',
+            'message' => 'required|string|max:10000',
             'type' => 'required|in:info,warning,important',
             'is_global' => 'boolean',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'nullable|date_format:Y-m-d',
+            'end_date' => ['nullable', 'date_format:Y-m-d', Rule::when($request->filled('start_date'), 'after_or_equal:start_date')],
             'target_roles' => 'nullable|array',
             'target_roles.*' => 'in:admin,hr_specialist,employee',
             'target_departments' => 'nullable|array',
-            'target_departments.*' => 'string',
+            'target_departments.*' => 'integer|exists:departments,id',
             'target_users' => 'nullable|array',
             'target_users.*' => 'exists:users,id',
         ], [
@@ -119,31 +109,31 @@ class NotificationController extends Controller
             'end_date.after_or_equal' => 'Дата окончания должна быть позже даты начала',
         ]);
 
-        $notification = new Notification();
+        $notification = new Notification;
         $notification->title = $validated['title'];
         $notification->message = $validated['message'];
         $notification->type = $validated['type'];
-        $notification->is_global = $request->has('is_global');
+        $notification->is_global = $request->boolean('is_global');
         $notification->created_by = Auth::id();
-        
+
         if ($request->filled('start_date')) {
             $notification->start_date = Carbon::parse($validated['start_date']);
         }
-        
+
         if ($request->filled('end_date')) {
-            $notification->end_date = Carbon::parse($validated['end_date']);
+            $notification->end_date = Carbon::parse($validated['end_date'])->endOfDay();
         }
-        
-        if (!$notification->is_global) {
+
+        if (! $notification->is_global) {
             $notification->target_roles = $request->input('target_roles');
-            $notification->target_departments = $request->input('target_departments');
-            $notification->target_users = $request->input('target_users');
+            $notification->target_departments = array_map('intval', (array) $request->input('target_departments', []));
+            $notification->target_users = array_map('intval', (array) $request->input('target_users', []));
         }
-        
+
         $notification->save();
-        
+
         return redirect()->route('notifications.index')
-                         ->with('success', 'Уведомление успешно создано');
+            ->with('success', 'Уведомление успешно создано');
     }
 
     /**
@@ -151,9 +141,9 @@ class NotificationController extends Controller
      */
     public function edit(Notification $notification)
     {
-        $departments = \App\Models\Department::orderBy('name')->get();
-                         
-        return view('notifications.edit', compact('notification', 'departments'));
+        $departments = Department::orderBy('name')->get();
+
+        return view('notifications.edit', ['notification' => $notification, 'departments' => $departments, 'users' => User::orderBy('name')->get()]);
     }
 
     /**
@@ -163,15 +153,15 @@ class NotificationController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'message' => 'required|string',
+            'message' => 'required|string|max:10000',
             'type' => 'required|in:info,warning,important',
             'is_global' => 'boolean',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'nullable|date_format:Y-m-d',
+            'end_date' => ['nullable', 'date_format:Y-m-d', Rule::when($request->filled('start_date'), 'after_or_equal:start_date')],
             'target_roles' => 'nullable|array',
             'target_roles.*' => 'in:admin,hr_specialist,employee',
             'target_departments' => 'nullable|array',
-            'target_departments.*' => 'string',
+            'target_departments.*' => 'integer|exists:departments,id',
             'target_users' => 'nullable|array',
             'target_users.*' => 'exists:users,id',
             'is_active' => 'boolean',
@@ -185,35 +175,37 @@ class NotificationController extends Controller
         $notification->title = $validated['title'];
         $notification->message = $validated['message'];
         $notification->type = $validated['type'];
-        $notification->is_global = $request->has('is_global');
-        $notification->is_active = $request->has('is_active');
-        
+        $notification->is_global = $request->boolean('is_global');
+        $notification->is_active = $request->boolean('is_active');
+
         if ($request->filled('start_date')) {
             $notification->start_date = Carbon::parse($validated['start_date']);
         } else {
             $notification->start_date = null;
         }
-        
+
         if ($request->filled('end_date')) {
-            $notification->end_date = Carbon::parse($validated['end_date']);
+            $notification->end_date = Carbon::parse($validated['end_date'])->endOfDay();
         } else {
             $notification->end_date = null;
         }
-        
-        if (!$notification->is_global) {
+
+        if (! $notification->is_global) {
             $notification->target_roles = $request->input('target_roles', []);
-            $notification->target_departments = $request->input('target_departments', []);
-            $notification->target_users = $request->input('target_users', []);
+            $notification->target_departments = array_map('intval', (array) $request->input('target_departments', []));
+            if ($request->has('audience_present') || $request->has('target_users')) {
+                $notification->target_users = array_map('intval', (array) $request->input('target_users', []));
+            }
         } else {
             $notification->target_roles = null;
             $notification->target_departments = null;
             $notification->target_users = null;
         }
-        
+
         $notification->save();
-        
+
         return redirect()->route('notifications.index')
-                         ->with('success', 'Уведомление успешно обновлено');
+            ->with('success', 'Уведомление успешно обновлено');
     }
 
     /**
@@ -222,61 +214,44 @@ class NotificationController extends Controller
     public function destroy(Notification $notification)
     {
         $notification->delete();
-        
+
         return redirect()->route('notifications.index')
-                         ->with('success', 'Уведомление успешно удалено');
+            ->with('success', 'Уведомление успешно удалено');
     }
-    
+
     /**
      * Возвращает уведомления для текущего пользователя (для отображения в дашборде)
      */
-    public function getUserNotifications()
+    public function show(Notification $notification)
     {
-        $user = Auth::user();
-        $allNotifications = Notification::where('is_active', true)->get();
-        
-        $notifications = [];
-        foreach ($allNotifications as $notification) {
-            if ($notification->isVisibleToUser($user)) {
-                $notificationData = $notification->toArray();
-                $notificationData['is_read'] = $notification->isReadByUser($user->id);
-                $notifications[] = $notificationData;
-            }
-        }
-        
-        return response()->json($notifications);
+        return redirect()->route('notifications.edit', $notification);
     }
-    
-    /**
-     * Отмечает уведомления как прочитанные для текущего пользователя
-     */
+
+    public function getUserNotifications(Request $request)
+    {
+        $query = Notification::visibleTo($request->user());
+        $unread = (clone $query)->whereDoesntHave('reads', fn ($q) => $q->where('users.id', $request->user()->id))->count();
+        $page = $query->with(['reads' => fn ($q) => $q->where('users.id', $request->user()->id)])->latest()->paginate(20);
+
+        return response()->json(['data' => $page->getCollection()->map(fn ($n) => [
+            'id' => $n->id, 'title' => $n->title, 'message' => $n->message, 'type' => $n->type, 'created_at' => $n->created_at, 'is_read' => $n->isReadByUser($request->user()->id),
+        ]), 'next_page_url' => $page->nextPageUrl(), 'unread_count' => $unread]);
+    }
+
     public function markAsRead(Request $request)
     {
-        $user = Auth::user();
-        $notificationIds = $request->input('notification_ids', []);
-        
-        if (empty($notificationIds)) {
-            // Если не указаны конкретные уведомления, отмечаем все как прочитанные
-            $allNotifications = Notification::where('is_active', true)->get();
-            
-            foreach ($allNotifications as $notification) {
-                if ($notification->isVisibleToUser($user)) {
-                    $notification->markAsReadByUser($user->id);
-                }
-            }
-            
-            return response()->json(['success' => true, 'message' => 'Все уведомления отмечены как прочитанные']);
-        } else {
-            // Отмечаем как прочитанные только указанные уведомления
-            $notifications = Notification::whereIn('id', $notificationIds)->get();
-            
-            foreach ($notifications as $notification) {
-                if ($notification->isVisibleToUser($user)) {
-                    $notification->markAsReadByUser($user->id);
-                }
-            }
-            
-            return response()->json(['success' => true, 'message' => 'Выбранные уведомления отмечены как прочитанные']);
+        $data = $request->validate(['notification_ids' => 'sometimes|array|max:100', 'notification_ids.*' => 'integer|min:1']);
+        $query = Notification::visibleTo($request->user());
+        // An explicit empty array means none, an absent field means all.
+        if (array_key_exists('notification_ids', $data)) {
+            $query->whereIn('id', $data['notification_ids']);
         }
+        $query->select('notifications.*')->chunkById(100, function ($rows) use ($request) {
+            foreach ($rows as $row) {
+                $row->markAsReadByUser($request->user()->id);
+            }
+        });
+
+        return response()->json(['success' => true]);
     }
 }

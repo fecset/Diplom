@@ -16,6 +16,11 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        // Fail before RefreshDatabase if PHPUnit was invoked with unsafe configuration.
+        if ($app['config']->get('database.default') !== 'sqlite' || $app['config']->get('database.connections.sqlite.database') !== ':memory:') {
+            throw new \RuntimeException('Tests require SQLite :memory:, never the running project database.');
+        }
+
         return $app;
     }
 }

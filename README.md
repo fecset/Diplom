@@ -1,66 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Система управления персоналом
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12, PHP 8.2–8.5, MySQL 8 (рабочая БД), SQLite (изолированные тесты), Blade, Dompdf. Интерфейс на русском языке.
 
-## About Laravel
+## Установка
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Установите PHP с PDO MySQL, mbstring, fileinfo, DOM, XML, curl; Composer 2 и Node.js 20+ для обновления графиков.
+2. `composer install`; скопируйте `.env.example` в `.env`, заполните параметры своей БД и `APP_URL`.
+3. `php artisan key:generate`; `php artisan migrate`.
+4. Для локальной демонстрации используйте `APP_ENV=local`, затем `php artisan db:seed`. Демонстрационные пароли находятся в `UserSeeder`; эти данные допустимы только в local/testing. Seeder отказывается работать в production.
+5. `php artisan serve --host=127.0.0.1 --port=8000`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Для production: `APP_ENV=production`, `APP_DEBUG=false`, HTTPS, `SESSION_SECURE_COOKIE=true`, свой пароль БД, `php artisan personnel:create-admin admin`. Пароль вводится интерактивно и не попадает в историю команд. Известные демонстрационные учётные записи необходимо сменить/отключить перед публикацией. Не используйте демо-seeder на рабочих данных.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Роли
 
-## Learning Laravel
+| Действие | Сотрудник | HR | Администратор |
+|---|---|---|---|
+| Свои заявки, профиль, справка | Да | Да | Да |
+| Табель | Свой отдел (без отдела — только свой) | Все отделы | Все отделы |
+| Изменение табеля, рассмотрение заявок | Нет | Да, кроме своих | Да |
+| Кадровый учёт, уведомления | Нет | Да, кроме управления администраторами | Да |
+| Справочники, аналитика | Нет | Нет | Да |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Удаление сотрудника архивирует аккаунт (`deleted_at`), сохраняя заявки, табель и авторство уведомлений. Последний администратор не может быть понижен или удалён. Самоудаление профиля отсутствует; контактные данные и пароль редактируются в «Мой профиль».
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Правила заявок и табеля
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Просмотр табеля ничего не записывает. Пустая клетка означает отсутствие отметки. По сотруднику и дате допускается одна запись; изменения HR сериализуются блокировкой строки сотрудника.
 
-## Laravel Sponsors
+Новые и одобренные заявки одного сотрудника не могут пересекаться. Начало и конец включены в период; максимальный период — 367 дней. Для командировки обязательны место и цель. Решение из состояния `new` принимается один раз; повтор того же решения не создаёт новых записей, попытка изменить принятое решение возвращает 409. Дата, автор и комментарий решения сохраняются. Решение, уведомление и отметки табеля сохраняются одной транзакцией. При противоречащих отметках одобрение отклоняется с объяснением. Одобренный отпуск/больничный нельзя перекрыть явкой. Командировка учитывается как явка в действующей модели из четырёх статусов.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Учебная политика баланса: календарный год, настраиваемая норма сотрудника (28 дней по умолчанию), без переносов и исключения праздников. Интервалы обрезаются границами года, пересечения учитываются один раз, баланс не отображается отрицательным. Одобрение проверяет норму каждого затронутого года. Это явно выбранная модель проекта; для кадрового расчёта по рабочим годам нужна отдельная бизнес-политика.
 
-### Premium Partners
+## Документы и обновление существующей установки
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Вложения сохраняются на диске `private` в `storage/app/private/documents` под случайными именами. Скачивание выполняется через авторизованный маршрут: владелец заявки, HR, администратор. Не размещайте этот каталог в корне веб-сервера и не создавайте на него публичную ссылку. Корень веб-сервера — только `public/`.
 
-## Contributing
+Перед обновлением сохраните резервную копию БД, `.env` и `storage/app` в закрытом каталоге. Затем:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+php artisan down
+composer install --no-interaction
+php artisan migrate --force
+php artisan personnel:private-documents --dry-run
+php artisan personnel:private-documents
+php artisan optimize:clear
+php artisan up
+```
 
-## Code of Conduct
+Миграция уникального ключа табеля останавливается при старых дублях и ничего не удаляет автоматически. Разберите дубли из резервной копии, сохранив корректную запись и историю спорных отметок. Перенос документов проверяет SHA-256 копии перед обновлением ссылки в БД и удалением публичного оригинала; при ошибке сохраняет исходник и возвращает ненулевой код. При проблемах не открывайте приложение до устранения ошибок. Восстановление старой версии требует согласованного восстановления БД и файлов из одной резервной копии.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Пароль БД исключён из шаблона `.env.example`; `.env`, vendor, логи, документы, кеши не хранятся в Git. Если секретный шаблон ранее передавался другим людям, смените пароль БД и обновите `.env` согласованно с сервером. Сама очистка шаблона не отзывает уже раскрытый пароль.
 
-## Security Vulnerabilities
+## Интерфейс и сборка
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Blade использует `public/css/custom.css` и `public/js/app.js`. Chart.js 4.5.1 закреплён в `package-lock.json`, локальные сборки и лицензия находятся в `public/vendor/chart.js`. Для их воспроизведения: `npm ci --ignore-scripts`, `npm run build`. Для обычного запуска Node.js не требуется. Поиск/фильтры/сортировка выполняются сервером перед пагинацией; кнопки и ссылки доступны с клавиатуры, модальные окна используют `<dialog>` с Escape и возвратом фокуса. Уведомления выводятся как текст, без интерпретации HTML.
 
-## License
+## Проверки
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+php -d extension=pdo_sqlite vendor/phpunit/phpunit/phpunit
+composer validate --strict
+npm run build
+node --check public/js/app.js
+```
+
+На PHP с уже включённым PDO SQLite опустите `-d extension=pdo_sqlite`. `phpunit.xml` принудительно выбирает SQLite `:memory:`, а bootstrap тестов запрещает другой драйвер/файл до миграций. Тесты никогда не должны выполняться с рабочей MySQL БД. Набор проверяет права, сохранение внешних ключей, поиск между страницами, приватные файлы, откаты транзакций, повтор решений, конфликт табеля, баланс, аудит чтения и ограничение входа.
+
+На production используйте постоянный общий cache-store (Redis или файл при одном сервере) для ограничения попыток входа. PHPUnit использует array-cache отдельно. Обновляйте зависимости и проверяйте `composer audit` в разрешённой сетевой среде.

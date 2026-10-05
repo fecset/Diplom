@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
     <nav class="sidebar__nav">
         <ul class="sidebar__list">
             <li class="sidebar__item">
@@ -81,6 +81,11 @@
                     Аналитика
                 </a>
             </li>
+            @endif
+            <li class="sidebar__item"><a class="sidebar__link" href="{{ route('profile.edit') }}">Мой профиль</a></li>
+            @if(auth()->user()->isAdmin())
+            <li class="sidebar__item"><a class="sidebar__link" href="{{ route('admin.departments.index') }}">Отделы</a></li>
+            <li class="sidebar__item"><a class="sidebar__link" href="{{ route('admin.positions.index') }}">Должности</a></li>
             @endif
         </ul>
     </nav>

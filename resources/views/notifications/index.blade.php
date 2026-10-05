@@ -15,10 +15,10 @@
         </a>
     </div>
 
-    <div class="notifications-filters">
+    <form method="GET" class="notifications-filters">
         <div class="notifications-filter-group">
             <label for="filterType" class="notifications-filter-label">Тип:</label>
-            <select id="filterType" class="notifications-filter-select">
+            <select id="filterType" name="type" class="notifications-filter-select">
                 <option value="">Все типы</option>
                 <option value="info" {{ request('type') == 'info' ? 'selected' : '' }}>Информационное</option>
                 <option value="warning" {{ request('type') == 'warning' ? 'selected' : '' }}>Предупреждение</option>
@@ -28,7 +28,7 @@
 
         <div class="notifications-filter-group">
             <label for="filterStatus" class="notifications-filter-label">Статус:</label>
-            <select id="filterStatus" class="notifications-filter-select">
+            <select id="filterStatus" name="status" class="notifications-filter-select">
                 <option value="">Все статусы</option>
                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Активные</option>
                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Неактивные</option>
@@ -37,7 +37,7 @@
 
         <div class="notifications-filter-group">
             <label for="filterGlobal" class="notifications-filter-label">Глобальное:</label>
-            <select id="filterGlobal" class="notifications-filter-select">
+            <select id="filterGlobal" name="is_global" class="notifications-filter-select">
                 <option value="">Все</option>
                 <option value="true" {{ request('is_global') == 'true' ? 'selected' : '' }}>Да</option>
                 <option value="false" {{ request('is_global') == 'false' ? 'selected' : '' }}>Нет</option>
@@ -46,11 +46,11 @@
 
         <div class="notifications-filter-group">
             <label for="filterTitle" class="notifications-filter-label">Поиск по заголовку:</label>
-            <input type="text" id="filterTitle" class="notifications-filter-input" placeholder="Введите заголовок..." value="{{ request('title') }}">
+            <input type="text" id="filterTitle" name="title" class="notifications-filter-input" placeholder="Введите заголовок..." value="{{ request('title') }}">
         </div>
 
-        <a type="button" id="resetFilters" class="notifications-filter-reset">Сбросить</a>
-    </div>
+        <button type="submit" class="btn">Найти</button><a href="{{ route('notifications.index') }}" class="notifications-filter-reset">Сбросить</a>
+    </form>
 
     <div id="noResultsMessage" class="notifications-no-results" style="display: none;">
         <p>Уведомления не найдены. Попробуйте изменить параметры поиска.</p>
@@ -60,12 +60,12 @@
         <table class="notifications-table" id="notificationsTable">
             <thead>
                 <tr>
-                    <th data-sort="title">Заголовок <span class="notifications-sort-icon">↕</span></th>
-                    <th data-sort="type">Тип <span class="notifications-sort-icon">↕</span></th>
+                    <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'title','order'=>($sortField==='title' && $sortOrder==='asc')?'desc':'asc'])) }}">Заголовок <span class="notifications-sort-icon">↕</span></a></th>
+                    <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'type','order'=>($sortField==='type' && $sortOrder==='asc')?'desc':'asc'])) }}">Тип <span class="notifications-sort-icon">↕</span></a></th>
                     <th>Статус</th>
                     <th>Глобальное</th>
-                    <th data-sort="start_date">Период <span class="notifications-sort-icon">↕</span></th>
-                    <th data-sort="created_at">Создано <span class="notifications-sort-icon">↕</span></th>
+                    <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'start_date','order'=>($sortField==='start_date' && $sortOrder==='asc')?'desc':'asc'])) }}">Период <span class="notifications-sort-icon">↕</span></a></th>
+                    <th><a href="{{ request()->url().'?'.http_build_query(array_merge(request()->except('page'), ['sort'=>'created_at','order'=>($sortField==='created_at' && $sortOrder==='asc')?'desc':'asc'])) }}">Создано <span class="notifications-sort-icon">↕</span></a></th>
                     <th>Действия</th>
                 </tr>
             </thead>
@@ -121,7 +121,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </a>
                         
-                        <form method="POST" action="{{ route('notifications.destroy', $notification) }}" class="delete-form" data-notification-title="{{ $notification->title }}">
+                        <form method="POST" action="{{ route('notifications.destroy', $notification) }}" onsubmit="return confirm('Удалить уведомление?')" class="delete-form" data-notification-title="{{ $notification->title }}">
                             @csrf
                             @method('DELETE')
                             <button type="button" class="action-icon delete-icon" title="Удалить">
@@ -146,237 +146,8 @@
     @endif
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    initNotificationsFiltering();
-    setupPaginationLinks();
-    
-    // Устанавливаем сортировку на основе данных из контроллера
-    @if(isset($sortField) && isset($sortOrder))
-    const sortField = '{{ $sortField }}';
-    const sortOrder = '{{ $sortOrder }}';
-    
-    if (sortField && sortOrder) {
-        const header = document.querySelector(`th[data-sort="${sortField}"]`);
-        if (header) {
-            const icon = header.querySelector('.notifications-sort-icon');
-            icon.textContent = sortOrder === 'asc' ? '↑' : '↓';
-            icon.classList.add('notifications-sort-icon--active');
-            
-            if (window.notificationsCurrentSort) {
-                window.notificationsCurrentSort.field = sortField;
-                window.notificationsCurrentSort.order = sortOrder;
-            }
-        }
-    }
-    @endif
 
-    // Обработчики для удаления
-    const deleteForms = document.querySelectorAll('.delete-form');
-    deleteForms.forEach(form => {
-        const deleteButton = form.querySelector('.delete-icon');
-        const notificationTitle = form.getAttribute('data-notification-title');
-        
-        if (deleteButton) {
-            deleteButton.addEventListener('click', function() {
-                if (confirm(`Вы уверены, что хотите удалить уведомление "${notificationTitle}"?`)) {
-                    form.submit();
-                }
-            });
-        }
-    });
-});
 
-function initNotificationsFiltering() {
-    const table = document.getElementById('notificationsTable');
-    const rows = Array.from(table.querySelectorAll('tbody tr.notifications-row'));
-    const filterType = document.getElementById('filterType');
-    const filterStatus = document.getElementById('filterStatus');
-    const filterGlobal = document.getElementById('filterGlobal');
-    const filterTitle = document.getElementById('filterTitle');
-    const resetButton = document.getElementById('resetFilters');
-    const sortableHeaders = document.querySelectorAll('th[data-sort]');
-    
-    // Текущие параметры сортировки
-    window.notificationsCurrentSort = {
-        field: '{{ $sortField ?? 'created_at' }}',
-        order: '{{ $sortOrder ?? 'desc' }}'
-    };
-    
-    // Создаем массив данных для Fuse.js
-    const searchData = rows.map(row => ({
-        element: row,
-        title: row.getAttribute('data-title'),
-        type: row.getAttribute('data-type'),
-        status: row.getAttribute('data-status'),
-        isGlobal: row.getAttribute('data-is-global'),
-        startDate: row.getAttribute('data-start-date'),
-        endDate: row.getAttribute('data-end-date'),
-        createdAt: row.getAttribute('data-created-at')
-    }));
-    
-    // Настройки Fuse.js
-    const fuseOptions = {
-        keys: ['title'],
-        threshold: 0.3,
-        includeScore: true,
-        shouldSort: false
-    };
-    
-    const fuse = new Fuse(searchData, fuseOptions);
-    
-    function filterAndSortTable() {
-        const typeFilter = filterType.value;
-        const statusFilter = filterStatus.value;
-        const globalFilter = filterGlobal.value;
-        const titleFilter = filterTitle.value.trim().toLowerCase();
-        
-        // Управление пагинацией
-        const paginationContainer = document.querySelector('.notifications-pagination');
-        if (typeFilter || statusFilter || globalFilter || titleFilter) {
-            if (paginationContainer) paginationContainer.style.display = 'none';
-        } else {
-            if (paginationContainer) paginationContainer.style.display = '';
-        }
-        
-        // Скрываем все строки
-        rows.forEach(row => row.style.display = 'none');
-        
-        // Фильтрация
-        let filteredData = searchData;
-        
-        if (titleFilter) {
-            const searchResults = fuse.search(titleFilter);
-            filteredData = searchResults.map(result => result.item);
-        }
-        
-        filteredData = filteredData.filter(item => {
-            if (typeFilter && item.type !== typeFilter) return false;
-            if (statusFilter && item.status !== statusFilter) return false;
-            if (globalFilter && item.isGlobal !== globalFilter) return false;
-            return true;
-        });
-        
-        // Отображаем отфильтрованные строки
-        const visibleRows = filteredData.map(item => item.element);
-        visibleRows.forEach(row => row.style.display = '');
-        
-        // Сортировка
-        visibleRows.sort((a, b) => {
-            let aValue = a.getAttribute(`data-${window.notificationsCurrentSort.field}`);
-            let bValue = b.getAttribute(`data-${window.notificationsCurrentSort.field}`);
-            
-            if (window.notificationsCurrentSort.field === 'created_at' || 
-                window.notificationsCurrentSort.field === 'start_date' || 
-                window.notificationsCurrentSort.field === 'end_date') {
-                
-                // Обрабатываем пустую строку или null как null перед созданием Date
-                aValue = (aValue === null || aValue === '') ? null : aValue;
-                bValue = (bValue === null || bValue === '') ? null : bValue;
-
-                // Определяем даты для сравнения, обрабатывая null/пустые значения
-                // При asc сортировке null идет первым (считаем его очень старой датой)
-                // При desc сортировке null идет последним (считаем его очень новой датой)
-                const dateA = aValue ? new Date(aValue).getTime() : (window.notificationsCurrentSort.order === 'asc' ? -Infinity : Infinity);
-                const dateB = bValue ? new Date(bValue).getTime() : (window.notificationsCurrentSort.order === 'asc' ? -Infinity : Infinity);
-                
-                // Если даты невалидны, помещаем их в конец (для asc) или начало (для desc)
-                if (isNaN(dateA) && isNaN(dateB)) return 0;
-                if (isNaN(dateA)) return window.notificationsCurrentSort.order === 'asc' ? 1 : -1;
-                if (isNaN(dateB)) return window.notificationsCurrentSort.order === 'asc' ? -1 : 1;
-
-                return window.notificationsCurrentSort.order === 'asc' ? 
-                    dateA - dateB : dateB - dateA;
-            }
-            
-            return window.notificationsCurrentSort.order === 'asc' ? 
-                aValue.localeCompare(bValue) : 
-                bValue.localeCompare(aValue);
-        });
-        
-        // Переупорядочиваем строки
-        const tbody = table.querySelector('tbody');
-        visibleRows.forEach(row => tbody.appendChild(row));
-        
-        // Обновляем индикаторы сортировки
-        updateSortIcons();
-        
-        // Показываем сообщение, если ничего не найдено
-        const noResults = document.getElementById('noResultsMessage');
-        if (noResults) {
-            noResults.style.display = visibleRows.length === 0 ? 'block' : 'none';
-        }
-    }
-    
-    // Обработчики событий для сортировки
-    sortableHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-            const field = this.getAttribute('data-sort');
-            
-            if (window.notificationsCurrentSort.field === field) {
-                window.notificationsCurrentSort.order = 
-                    window.notificationsCurrentSort.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                window.notificationsCurrentSort.field = field;
-                window.notificationsCurrentSort.order = 'asc';
-            }
-            
-            filterAndSortTable();
-        });
-    });
-    
-    function updateSortIcons() {
-        sortableHeaders.forEach(header => {
-            const field = header.getAttribute('data-sort');
-            const icon = header.querySelector('.notifications-sort-icon');
-            
-            if (field === window.notificationsCurrentSort.field) {
-                icon.textContent = window.notificationsCurrentSort.order === 'asc' ? '↑' : '↓';
-                icon.classList.add('notifications-sort-icon--active');
-            } else {
-                icon.textContent = '↕';
-                icon.classList.remove('notifications-sort-icon--active');
-            }
-        });
-    }
-    
-    // Привязываем обработчики событий
-    filterType.addEventListener('change', filterAndSortTable);
-    filterStatus.addEventListener('change', filterAndSortTable);
-    filterGlobal.addEventListener('change', filterAndSortTable);
-    
-    let searchTimeout;
-    filterTitle.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterAndSortTable, 300);
-    });
-    
-    resetButton.addEventListener('click', function() {
-        filterType.value = '';
-        filterStatus.value = '';
-        filterGlobal.value = '';
-        filterTitle.value = '';
-        filterAndSortTable();
-    });
-    
-    // Запускаем первичную фильтрацию
-    filterAndSortTable();
-}
-
-function setupPaginationLinks() {
-    const paginationLinks = document.querySelectorAll('.notifications-pagination .pagination a');
-    
-    paginationLinks.forEach(link => {
-        const url = new URL(link.href);
-        if (window.notificationsCurrentSort) {
-            url.searchParams.set('sort', window.notificationsCurrentSort.field);
-            url.searchParams.set('order', window.notificationsCurrentSort.order);
-        }
-        link.href = url.toString();
-    });
-}
-</script>
 
 <style>
 /* Основные стили контейнера и заголовка остаются без изменений */

@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Models\Department;
 use App\Models\Notification;
 use App\Models\User;
 use Carbon\Carbon;
-use App\Models\Department;
+use Illuminate\Database\Seeder;
 
 class NotificationSeeder extends Seeder
 {
@@ -16,14 +15,18 @@ class NotificationSeeder extends Seeder
      */
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Demo seeds are allowed only in local/testing.');
+        }
         // Сначала находим админа для создания уведомлений от его имени
         $admin = User::where('role', 'admin')->first();
-        
-        if (!$admin) {
+
+        if (! $admin) {
             $this->command->info('Администратор не найден. Создайте администратора перед запуском этого сидера.');
+
             return;
         }
-        
+
         // Создаем глобальное важное уведомление
         Notification::create([
             'title' => 'Важное корпоративное собрание',
@@ -33,7 +36,7 @@ class NotificationSeeder extends Seeder
             'is_global' => true,
             'is_active' => true,
         ]);
-        
+
         // Создаем уведомление только для HR-специалистов
         Notification::create([
             'title' => 'Обновление системы учета рабочего времени',
@@ -44,7 +47,7 @@ class NotificationSeeder extends Seeder
             'target_roles' => ['hr_specialist'],
             'is_active' => true,
         ]);
-        
+
         // Создаем уведомление с датой начала и окончания
         Notification::create([
             'title' => 'Плановые технические работы',
@@ -56,10 +59,10 @@ class NotificationSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(5),
             'is_active' => true,
         ]);
-        
+
         // Создаем уведомление для определенного отдела
-        $itDepartment = Department::where('name', 'ИТ-отдел')->first();
-        
+        $itDepartment = Department::where('name', 'IT-отдел')->first();
+
         if ($itDepartment) {
             Notification::create([
                 'title' => 'Обновление ПО',
@@ -71,7 +74,7 @@ class NotificationSeeder extends Seeder
                 'is_active' => true,
             ]);
         }
-        
+
         // Создаем неактивное уведомление
         Notification::create([
             'title' => 'Тестовое уведомление',
@@ -81,7 +84,7 @@ class NotificationSeeder extends Seeder
             'is_global' => true,
             'is_active' => false,
         ]);
-        
+
         $this->command->info('Тестовые уведомления успешно созданы.');
     }
 }

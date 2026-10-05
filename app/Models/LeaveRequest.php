@@ -24,14 +24,14 @@ class LeaveRequest extends Model
         'purpose',
         'status',
         'hr_comment',
-        'document_path'
+        'document_path', 'legacy_document_path', 'decided_by', 'decided_at',
     ];
-    
+
     /**
      * Получить сотрудника, которому принадлежит заявка
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 }

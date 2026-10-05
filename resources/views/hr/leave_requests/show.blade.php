@@ -88,6 +88,13 @@
                         <div class="request-details__info-label">Дата подачи:</div>
                         <div class="request-details__info-value">{{ $leaveRequest->created_at->format('d.m.Y H:i') }}</div>
                     </div>
+                    @if($leaveRequest->type === 'business_trip')
+                    <div class="request-details__info-row"><div class="request-details__info-label">Место командировки:</div><div class="request-details__info-value">{{ $leaveRequest->destination }}</div></div>
+                    <div class="request-details__info-row"><div class="request-details__info-label">Цель командировки:</div><div class="request-details__info-value">{{ $leaveRequest->purpose }}</div></div>
+                    @endif
+                    @if($leaveRequest->decided_at)
+                    <div class="request-details__info-row"><div class="request-details__info-label">Решение:</div><div class="request-details__info-value">{{ $leaveRequest->decided_at }} · сотрудник #{{ $leaveRequest->decided_by }}</div></div>
+                    @endif
                     @if($leaveRequest->hr_comment)
                     <div class="request-details__info-row">
                         <div class="request-details__info-label">Комментарий HR:</div>
@@ -98,7 +105,7 @@
                     <div class="request-details__info-row">
                         <div class="request-details__info-label">Прикрепленный документ:</div>
                         <div class="request-details__info-value">
-                            <a href="{{ asset('storage/' . $leaveRequest->document_path) }}" target="_blank" class="request-details__document-link">
+                            <a href="{{ route('leave_requests.document', $leaveRequest) }}" target="_blank" class="request-details__document-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>

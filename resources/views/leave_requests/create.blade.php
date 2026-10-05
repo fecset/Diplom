@@ -12,41 +12,41 @@
             <div class="request-form__field">
                 <label for="type">Тип заявки:</label>
                 <select name="type" id="type" class="request-form__select" required>
-                    <option value="vacation" {{ $type === 'vacation' ? 'selected' : '' }}>Отпуск</option>
-                    <option value="sick_leave" {{ $type === 'sick_leave' ? 'selected' : '' }}>Больничный</option>
-                    <option value="business_trip" {{ $type === 'business_trip' ? 'selected' : '' }}>Командировка</option>
+                    <option value="vacation" {{ old('type', $type) === 'vacation' ? 'selected' : '' }}>Отпуск</option>
+                    <option value="sick_leave" {{ old('type', $type) === 'sick_leave' ? 'selected' : '' }}>Больничный</option>
+                    <option value="business_trip" {{ old('type', $type) === 'business_trip' ? 'selected' : '' }}>Командировка</option>
                 </select>
             </div>
 
             <div class="request-form__field">
                 <label for="date_start">Дата начала:</label>
-                <input type="date" name="date_start" id="date_start" required>
+                <input type="date" name="date_start" id="date_start" value="{{ old('date_start') }}" required>
             </div>
 
             <div class="request-form__field">
                 <label for="date_end">Дата окончания:</label>
-                <input type="date" name="date_end" id="date_end" required>
+                <input type="date" name="date_end" id="date_end" value="{{ old('date_end') }}" required>
             </div>
 
             <div class="request-form__field business-trip-fields" style="display: none;">
                 <label for="destination">Место командировки:</label>
-                <input type="text" name="destination" id="destination" placeholder="Укажите место командировки">
+                <input type="text" name="destination" id="destination" value="{{ old('destination') }}" placeholder="Укажите место командировки">
             </div>
 
             <div class="request-form__field business-trip-fields" style="display: none;">
                 <label for="purpose">Цель командировки:</label>
-                <textarea name="purpose" id="purpose" class="request-form__textarea" placeholder="Укажите цель командировки"></textarea>
+                <textarea name="purpose" id="purpose" class="request-form__textarea" placeholder="Укажите цель командировки">{{ old('purpose') }}</textarea>
             </div>
 
             <div class="request-form__field">
                 <label for="reason">Причина:</label>
-                <textarea name="reason" id="reason" class="request-form__textarea" placeholder="Укажите причину (необязательно)"></textarea>
+                <textarea name="reason" id="reason" class="request-form__textarea" placeholder="Укажите причину (необязательно)">{{ old('reason') }}</textarea>
             </div>
 
             <div class="request-form__field">
                 <label for="document">Документ:</label>
                 <input type="file" name="document" id="document" accept=".jpeg,.jpg,.png,.pdf">
-                <small class="request-form__help">Максимальный размер файла: 5MB. Разрешенные форматы: JPEG, PNG, PDF</small>
+                <small class="request-form__help">После ошибки выберите файл повторно. Максимальный размер файла: 5MB. Разрешенные форматы: JPEG, PNG, PDF</small>
             </div>
 
             <div class="request-form__actions">

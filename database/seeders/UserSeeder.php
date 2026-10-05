@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use Carbon\Carbon;
 use App\Models\Department;
 use App\Models\Position;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -17,6 +16,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Demo seeds are allowed only in local/testing.');
+        }
+        mt_srand(20261005); // Reproducible demo dataset.
         // Создаем администратора
         $department = Department::where('name', 'IT-отдел')->first();
         $position = Position::where('name', 'Системный администратор')->first();
@@ -91,7 +94,7 @@ class UserSeeder extends Seeder
             'Бухгалтерия',
             'Отдел кадров',
             'IT-отдел',
-            'Юридический отдел'
+            'Юридический отдел',
         ];
 
         $positions = [
@@ -108,18 +111,18 @@ class UserSeeder extends Seeder
             'Бухгалтер',
             'HR-специалист',
             'Системный администратор',
-            'Юрист'
+            'Юрист',
         ];
 
-        $firstNames = ['Александр', 'Алексей', 'Анатолий', 'Андрей', 'Антон', 'Борис', 'Вадим', 'Валентин', 'Валерий', 'Василий', 
-                      'Виктор', 'Владимир', 'Геннадий', 'Георгий', 'Дмитрий', 'Евгений', 'Иван', 'Игорь', 'Илья', 'Кирилл',
-                      'Анна', 'Алена', 'Екатерина', 'Елена', 'Инна', 'Ирина', 'Марина', 'Мария', 'Наталья', 'Ольга',
-                      'Светлана', 'Татьяна', 'Юлия'];
-        
+        $firstNames = ['Александр', 'Алексей', 'Анатолий', 'Андрей', 'Антон', 'Борис', 'Вадим', 'Валентин', 'Валерий', 'Василий',
+            'Виктор', 'Владимир', 'Геннадий', 'Георгий', 'Дмитрий', 'Евгений', 'Иван', 'Игорь', 'Илья', 'Кирилл',
+            'Анна', 'Алена', 'Екатерина', 'Елена', 'Инна', 'Ирина', 'Марина', 'Мария', 'Наталья', 'Ольга',
+            'Светлана', 'Татьяна', 'Юлия'];
+
         $lastNames = ['Иванов', 'Петров', 'Сидоров', 'Смирнов', 'Кузнецов', 'Соколов', 'Попов', 'Лебедев', 'Козлов', 'Новиков',
-                     'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семенов', 'Егоров', 'Павлов', 'Козлов', 'Степанов',
-                     'Иванова', 'Петрова', 'Сидорова', 'Смирнова', 'Кузнецова', 'Соколова', 'Попова', 'Лебедева', 'Козлова'];
-        
+            'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Семенов', 'Егоров', 'Павлов', 'Козлов', 'Степанов',
+            'Иванова', 'Петрова', 'Сидорова', 'Смирнова', 'Кузнецова', 'Соколова', 'Попова', 'Лебедева', 'Козлова'];
+
         // Даты приема на работу от 2018 до текущего года
         $startDate = Carbon::createFromDate(2018, 1, 1);
         $endDate = Carbon::now();
@@ -127,30 +130,34 @@ class UserSeeder extends Seeder
         for ($i = 1; $i <= 20; $i++) {
             $lastName = $lastNames[array_rand($lastNames)];
             $firstName = $firstNames[array_rand($firstNames)];
-            $fullName = $lastName . ' ' . $firstName;
-            
+
             // Для женских имен корректируем фамилию
             if (in_array($firstName, ['Анна', 'Алена', 'Екатерина', 'Елена', 'Инна', 'Ирина', 'Марина', 'Мария', 'Наталья', 'Ольга', 'Светлана', 'Татьяна', 'Юлия'])) {
-                $lastName = substr($lastName, 0, -1) . (substr($lastName, -1) === 'в' ? 'ва' : 'а');
+                if (! str_ends_with($lastName, 'а')) {
+                    $lastName .= 'а';
+                }
+            } elseif (str_ends_with($lastName, 'а')) {
+                $lastName = mb_substr($lastName, 0, -1);
             }
 
-            $username = mb_strtolower(transliterate($firstName)) . '.' . mb_strtolower(transliterate($lastName));
+            $fullName = $lastName.' '.$firstName;
+            $username = mb_strtolower(transliterate($firstName)).'.'.mb_strtolower(transliterate($lastName));
             $departmentName = $departments[array_rand($departments)];
             $positionName = $positions[array_rand($positions)];
             $department = Department::where('name', $departmentName)->first();
             $position = Position::where('name', $positionName)->first();
 
             // Генерируем случайную дату приема в диапазоне
-            $daysToAdd = rand(0, $endDate->diffInDays($startDate));
+            $daysToAdd = rand(0, (int) $startDate->diffInDays($endDate));
             $hiredAt = $startDate->copy()->addDays($daysToAdd)->format('Y-m-d');
-            
+
             User::create([
                 'name' => $fullName,
-                'username' => $username . $i,
+                'username' => $username.$i,
                 'password' => Hash::make('employee123'),
                 'role' => 'employee',
-                'phone_number' => '+7999' . str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT),
-                'email' => $username . $i . '@company.local',
+                'phone_number' => '+7999'.str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT),
+                'email' => $username.$i.'@company.local',
                 'department_id' => $department ? $department->id : null,
                 'position_id' => $position ? $position->id : null,
                 'hired_at' => $hiredAt,
@@ -160,8 +167,9 @@ class UserSeeder extends Seeder
 }
 
 // Функция для транслитерации кириллицы в латиницу
-function transliterate($string) {
-    $converter = array(
+function transliterate($string)
+{
+    $converter = [
         'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
         'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i',
         'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n',
@@ -169,7 +177,7 @@ function transliterate($string) {
         'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch',
         'ш' => 'sh', 'щ' => 'sch', 'ь' => '', 'ы' => 'y', 'ъ' => '',
         'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
-        
+
         'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D',
         'Е' => 'E', 'Ё' => 'E', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I',
         'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N',
@@ -177,7 +185,7 @@ function transliterate($string) {
         'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch',
         'Ш' => 'Sh', 'Щ' => 'Sch', 'Ь' => '', 'Ы' => 'Y', 'Ъ' => '',
         'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya',
-    );
-    
+    ];
+
     return strtr($string, $converter);
 }

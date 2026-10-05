@@ -27,6 +27,7 @@
         
         <form action="{{ route('hr.personnel.update', $user) }}" method="POST" class="personnel-form__form">
             @csrf
+            <div class="form-group"><label for="vacationDays">Дней отпуска в календарном году</label><input type="number" class="form-control" id="vacationDays" name="vacation_days_per_year" min="0" max="366" value="{{ old('vacation_days_per_year', $user->vacation_days_per_year) }}" required></div>
             @method('PUT')
             
             <div class="form-group">

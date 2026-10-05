@@ -49,8 +49,8 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1"></script>
+<script src="{{ asset('vendor/chart.js/chart.umd.js') }}"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Данные из контроллера
@@ -66,8 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Функция для получения названия месяца на русском
     function getMonthName(monthNumber) {
-        const date = new Date();
-        date.setMonth(monthNumber - 1);
+        const date = new Date(2000, monthNumber - 1, 1);
         return date.toLocaleString('ru-RU', { month: 'long' });
     }
 

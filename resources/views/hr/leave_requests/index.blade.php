@@ -18,7 +18,7 @@
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
-                Ожидающие ({{ $requests->where('status', 'new')->count() }})
+                Ожидающие ({{ $pendingCount }})
             </a>
             <a href="{{ route('hr.leave_requests.vacations') }}" class="hr-leave-requests__tab {{ request('type') === 'vacation' ? 'hr-leave-requests__tab--active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -79,7 +79,7 @@
             </div>
             
             <div class="hr-leave-requests__filter-actions">
-                <a href="javascript:void(0)" id="resetFilters" class="hr-leave-requests__filter-reset">Сбросить</a>
+                <button type="submit" class="btn">Найти</button><a href="{{ route('hr.leave_requests.index') }}" class="hr-leave-requests__filter-reset">Сбросить</a>
             </div>
         </form>
     </div>
@@ -106,7 +106,7 @@
                         <tr class="hr-leave-requests__row {{ $request->status === 'new' ? 'hr-leave-requests__row--new' : '' }}" 
                             data-id="{{ $request->id }}"
                             data-name="{{ $request->user->name }}"
-                            data-department="{{ $request->user->department }}"
+                            data-department="{{ $request->user->department_id }}"
                             data-type="{{ $request->type }}"
                             data-date-start="{{ $request->date_start }}"
                             data-date-end="{{ $request->date_end }}"
@@ -219,212 +219,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Инициализация фильтрации заявок');
-    initLeaveRequestsFiltering();
-    setupPaginationLinks();
-});
 
-function initLeaveRequestsFiltering() {
-    const table = document.getElementById('leaveRequestsTable');
-    const rows = Array.from(table.querySelectorAll('tbody tr.hr-leave-requests__row'));
-    const filterName = document.getElementById('name');
-    const filterDepartment = document.getElementById('department');
-    const filterDateFrom = document.getElementById('date_from');
-    const filterDateTo = document.getElementById('date_to');
-    const filterType = document.getElementById('type');
-    const filterStatus = document.getElementById('status');
-    const resetButton = document.getElementById('resetFilters');
-    
-    console.log('Найдено строк в таблице:', rows.length);
-    
-    // Создаем массив данных для Fuse.js
-    const searchData = rows.map(row => {
-        return {
-            element: row,
-            id: row.getAttribute('data-id'),
-            name: row.getAttribute('data-name'),
-            department: row.getAttribute('data-department'),
-            type: row.getAttribute('data-type'),
-            dateStart: row.getAttribute('data-date-start'),
-            dateEnd: row.getAttribute('data-date-end'),
-            status: row.getAttribute('data-status'),
-            createdAt: row.getAttribute('data-created-at')
-        };
-    });
-    
-    // Настройки Fuse.js
-    const fuseOptions = {
-        keys: ['name'],
-        threshold: 0.3,
-        includeScore: true,
-        shouldSort: false
-    };
-    
-    // Инициализация Fuse.js
-    const fuse = new Fuse(searchData, fuseOptions);
-    
-    // Функция фильтрации
-    function filterTable() {
-        const nameFilter = filterName.value.trim().toLowerCase();
-        const departmentFilter = filterDepartment.value;
-        const dateFromFilter = filterDateFrom.value;
-        const dateToFilter = filterDateTo.value;
-        const typeFilter = filterType ? filterType.value : '';
-        const statusFilter = filterStatus ? filterStatus.value : '';
-        
-        console.log('Применение фильтров:', {
-            name: nameFilter,
-            department: departmentFilter,
-            dateFrom: dateFromFilter,
-            dateTo: dateToFilter,
-            type: typeFilter,
-            status: statusFilter
-        });
-        
-        // Управление пагинацией - скрываем при активном фильтре
-        const paginationContainer = document.getElementById('paginationContainer');
-        if (nameFilter || departmentFilter || dateFromFilter || dateToFilter) {
-            if (paginationContainer) paginationContainer.style.display = 'none';
-        } else {
-            if (paginationContainer) paginationContainer.style.display = '';
-        }
-        
-        // Скрываем все строки перед фильтрацией
-        rows.forEach(row => {
-            row.style.display = 'none';
-        });
-        
-        // Получаем результаты поиска
-        let filteredData = searchData;
-        
-        // Применяем поиск по имени, если введен текст
-        if (nameFilter) {
-            const searchResults = fuse.search(nameFilter);
-            filteredData = searchResults.map(result => result.item);
-        }
-        
-        // Фильтруем по отделу
-        if (departmentFilter) {
-            filteredData = filteredData.filter(item => item.department === departmentFilter);
-        }
-        
-        // Фильтруем по типу заявки
-        if (typeFilter) {
-            filteredData = filteredData.filter(item => item.type === typeFilter);
-        }
-        
-        // Фильтруем по статусу
-        if (statusFilter) {
-            filteredData = filteredData.filter(item => item.status === statusFilter);
-        }
-        
-        // Фильтруем по дате начала
-        if (dateFromFilter) {
-            filteredData = filteredData.filter(item => {
-                return new Date(item.dateStart) >= new Date(dateFromFilter);
-            });
-        }
-        
-        // Фильтруем по дате окончания
-        if (dateToFilter) {
-            filteredData = filteredData.filter(item => {
-                return new Date(item.dateEnd) <= new Date(dateToFilter);
-            });
-        }
-        
-        // Отображаем отфильтрованные строки
-        const visibleRows = filteredData.map(item => item.element);
-        
-        console.log('Отображаем строк после фильтрации:', visibleRows.length);
-        
-        visibleRows.forEach(row => {
-            row.style.display = '';
-        });
-        
-        // Показываем сообщение, если ничего не найдено
-        const noResults = document.getElementById('noResultsMessage');
-        if (noResults) {
-            if (visibleRows.length === 0) {
-                noResults.style.display = 'block';
-            } else {
-                noResults.style.display = 'none';
-            }
-        }
-    }
-    
-    // Привязываем обработчики событий
-    filterDepartment.addEventListener('change', filterTable);
-    
-    // Для полей с датами используем событие change
-    filterDateFrom.addEventListener('change', filterTable);
-    filterDateTo.addEventListener('change', filterTable);
-    
-    // Для поиска по имени используем debounce
-    let searchTimeout;
-    filterName.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterTable, 300);
-    });
-    
-    // Сброс фильтров
-    resetButton.addEventListener('click', function() {
-        filterName.value = '';
-        filterDepartment.value = '';
-        filterDateFrom.value = '';
-        filterDateTo.value = '';
-        
-        filterTable();
-        
-        console.log('Фильтры сброшены');
-    });
-    
-    // Запускаем фильтрацию при загрузке
-    filterTable();
-}
 
-function setupPaginationLinks() {
-    // Получаем все ссылки пагинации
-    const links = document.querySelectorAll('.pagination a');
-    
-    // Сохраняем текущие значения фильтров
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Получаем текущий URL ссылки
-            let url = new URL(this.href);
-            
-            // Добавляем параметры фильтров к URL
-            const name = document.getElementById('name').value;
-            const department = document.getElementById('department').value;
-            const dateFrom = document.getElementById('date_from').value;
-            const dateTo = document.getElementById('date_to').value;
-            
-            if (name) url.searchParams.set('name', name);
-            if (department) url.searchParams.set('department', department);
-            if (dateFrom) url.searchParams.set('date_from', dateFrom);
-            if (dateTo) url.searchParams.set('date_to', dateTo);
-            
-            // Обновляем ссылку
-            this.href = url.toString();
-        });
-    });
-}
-
-// Функция debounce для отложенной обработки
-function debounce(func, wait) {
-    let timeout;
-    return function() {
-        const context = this;
-        const args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(function() {
-            func.apply(context, args);
-        }, wait);
-    };
-}
-</script>
 
 <style>
 .hr-leave-requests {

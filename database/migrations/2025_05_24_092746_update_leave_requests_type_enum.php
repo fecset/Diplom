@@ -2,30 +2,21 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Сначала удаляем существующее ENUM ограничение
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN type VARCHAR(255)");
-        
-        // Затем добавляем новое ENUM ограничение с дополнительным значением
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN type ENUM('vacation', 'sick_leave', 'business_trip')");
+        Schema::table('leave_requests', fn (Blueprint $table) => $table->enum('type', ['vacation', 'sick_leave', 'business_trip'])->change());
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        // Возвращаем к исходному состоянию
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN type VARCHAR(255)");
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN type ENUM('vacation', 'sick_leave')");
+        if (DB::table('leave_requests')->where('type', 'business_trip')->exists()) {
+            throw new RuntimeException('Cannot roll back while business trips exist.');
+        }
+        Schema::table('leave_requests', fn (Blueprint $table) => $table->enum('type', ['vacation', 'sick_leave'])->change());
     }
 };

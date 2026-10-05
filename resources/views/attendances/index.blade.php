@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Табель учёта рабочего времени')
 @php
-    $use_wrapper = true;
     $labels = ['present'=>'Я', 'absent'=>'Н', 'vacation'=>'О', 'sick_leave'=>'Б'];
     $statusNames = ['present'=>'Явка / командировка', 'absent'=>'Неявка', 'vacation'=>'Отпуск', 'sick_leave'=>'Больничный'];
     $weekdays = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -9,8 +8,7 @@
 @endphp
 @section('content')
 <div class="ui-page">
-    @include('partials.status-messages')
-    <header class="ui-page-header"><div><p class="ui-eyebrow">Рабочее время</p><h1>Табель учёта рабочего времени</h1><p class="ui-description">{{ $canEdit ? 'Нажмите на день сотрудника, чтобы изменить отметку.' : 'Отметки рабочего времени сотрудников вашего отдела.' }} Для просмотра всех дней прокрутите таблицу вправо.</p></div></header>
+    <header class="ui-page-header"><div><h1>Табель учёта рабочего времени</h1><p class="ui-description">{{ $canEdit ? 'Нажмите на день сотрудника, чтобы изменить отметку.' : 'Отметки рабочего времени сотрудников вашего отдела.' }} Для просмотра всех дней прокрутите таблицу вправо.</p></div></header>
     <form method="GET" class="ui-filter-bar">
         <div><label for="attendanceMonth">Месяц</label><input type="month" id="attendanceMonth" name="date" value="{{ $start->format('Y-m') }}" required></div>
         <div><label for="attendanceName">Имя сотрудника</label><input type="text" id="attendanceName" name="name" placeholder="Поиск по имени" value="{{ request('name') }}"></div>

@@ -1,11 +1,9 @@
 @extends('layouts.app')
 @section('title', $title)
-@php $use_wrapper = true; @endphp
 @section('content')
 <div class="ui-page">
-    @include('partials.status-messages')
     <header class="ui-page-header">
-        <div><p class="ui-eyebrow">Справочники</p><h1>{{ $title }}</h1><p class="ui-description">{{ $kind === 'departments' ? 'Структура компании для кадрового учёта и фильтрации сотрудников.' : 'Должности, доступные в карточках сотрудников.' }}</p></div>
+        <div><h1>{{ $title }}</h1><p class="ui-description">{{ $kind === 'departments' ? 'Структура компании для кадрового учёта и фильтрации сотрудников.' : 'Должности, доступные в карточках сотрудников.' }}</p></div>
         <a class="ui-button" href="{{ route('admin.'.$kind.'.create') }}"><x-icon name="plus"/>Добавить запись</a>
     </header>
     <section class="ui-card" aria-label="{{ $title }}">

@@ -1,11 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Мой профиль')
-@php $use_wrapper = true; @endphp
 @section('content')
 <div class="ui-page">
-    @include('partials.status-messages')
     <header class="ui-page-header">
-        <div><p class="ui-eyebrow">Личный кабинет</p><h1>Мой профиль</h1><p class="ui-description">Контактные данные и безопасность вашей учётной записи.</p></div>
+        <div><h1>Мой профиль</h1><p class="ui-description">Контактные данные и безопасность вашей учётной записи.</p></div>
     </header>
     <form method="POST" action="{{ route('profile.update') }}" class="ui-profile-form">
         @csrf @method('PATCH')

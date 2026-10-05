@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const menu=document.getElementById('menuToggle'), sidebar=document.getElementById('sidebar');
+    sidebar?.querySelector('.sidebar__link.active')?.setAttribute('aria-current','page');
     const header=document.querySelector('#app > nav');
     if(header&&sidebar){
         const alignSidebar=()=>document.documentElement.style.setProperty('--app-nav-height',`${header.getBoundingClientRect().height}px`);

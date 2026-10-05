@@ -15,7 +15,7 @@
         </a>
     </div>
 
-    <form method="GET" class="notifications-filters ui-filter-bar">
+    <form method="GET" class="notifications-filters">
         <div class="notifications-filter-group">
             <label for="filterType" class="notifications-filter-label">Тип:</label>
             <select id="filterType" name="type" class="notifications-filter-select">
@@ -49,7 +49,7 @@
             <input type="text" id="filterTitle" name="title" class="notifications-filter-input" placeholder="Введите заголовок..." value="{{ request('title') }}">
         </div>
 
-        <div class="ui-filter-actions"><button type="submit" class="ui-button"><x-icon name="search"/>Найти</button><a href="{{ route('notifications.index') }}" class="ui-button ui-button--secondary">Сбросить</a></div>
+        <div class="original-filter-actions"><button type="submit" class="btn"><x-icon name="search"/>Найти</button><a href="{{ route('notifications.index') }}" class="notifications-filter-reset">Сбросить</a></div>
     </form>
 
     <div id="noResultsMessage" class="notifications-no-results" style="display: none;">

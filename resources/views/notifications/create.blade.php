@@ -11,7 +11,7 @@
             <form method="POST" action="{{ route('notifications.store') }}">
                 @csrf
                 <input type="hidden" name="audience_present" value="1">
-                
+
                 <div class="form-group">
                     <label for="title">Заголовок уведомления <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title') }}" required>
@@ -19,7 +19,7 @@
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
-                
+
                 <div class="form-group">
                     <label for="message">Текст уведомления <span class="text-danger">*</span></label>
                     <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="message" rows="5" required>{{ old('message') }}</textarea>
@@ -27,7 +27,7 @@
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
-                
+
                 <div class="form-group">
                     <label for="type">Тип уведомления <span class="text-danger">*</span></label>
                     <select class="form-control @error('type') is-invalid @enderror" id="type" name="type" required>
@@ -39,14 +39,14 @@
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
                 </div>
-                
+
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="is_global" name="is_global" value="1" {{ old('is_global') ? 'checked' : '' }}>
                     <label class="form-check-label" for="is_global">
                         Глобальное уведомление (для всех пользователей)
                     </label>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="target-section" class="{{ old('is_global') ? 'd-none' : '' }}">
                     <h4 class="mt-4 mb-3">Целевая аудитория</h4>
                     <fieldset class="ui-recipient-panel">
@@ -79,7 +79,7 @@
                             @empty<p class="ui-field-help">Нет доступных сотрудников.</p>@endforelse
                         </div>
                     </fieldset>
-                    
+
                     <div class="card mb-3">
                         <div class="card-header">Роли пользователей</div>
                         <div class="card-body">
@@ -97,7 +97,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="card mb-3">
                         <div class="card-header">Отделы</div>
                         <div class="card-body">
@@ -112,7 +112,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group mt-4">
                     <button type="submit" class="btn btn-primary">Создать уведомление</button>
                     <a href="{{ route('notifications.index') }}" class="btn btn-secondary">Отмена</a>
@@ -128,38 +128,38 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         margin-bottom: 30px;
     }
-    
+
     .card-header {
         background-color: #f7f7f7;
         border-bottom: 1px solid #eee;
         padding: 15px 20px;
     }
-    
+
     .card-header h1 {
         margin: 0;
         font-size: 1.5rem;
         font-weight: 600;
         color: #333;
     }
-    
+
     .card-body {
         padding: 20px;
     }
-    
+
     .form-group {
         margin-bottom: 1.5rem;
     }
-    
+
     label {
         font-weight: 500;
         margin-bottom: 0.5rem;
         display: block;
     }
-    
+
     .text-danger {
         color: #F44336;
     }
-    
+
     .form-control {
         border-radius: 5px;
         border: 1px solid #ddd;
@@ -167,22 +167,22 @@
         width: 100%;
         box-sizing: border-box;
     }
-    
+
     .form-control:focus {
         border-color: var(--color-primary);
         box-shadow: 0 0 0 0.2rem rgba(242, 101, 34, 0.25);
     }
-    
+
     .is-invalid {
         border-color: #F44336;
     }
-    
+
     .invalid-feedback {
         color: #F44336;
         font-size: 0.875rem;
         margin-top: 0.25rem;
     }
-    
+
     /* Стили для чекбоксов */
     .form-check {
         padding-left: 0;
@@ -190,7 +190,7 @@
         display: flex;
         align-items: center;
     }
-    
+
     .form-check-input {
         width: 18px;
         height: 18px;
@@ -205,12 +205,12 @@
         position: relative;
         cursor: pointer;
     }
-    
+
     .form-check-input:checked {
         background-color: var(--color-primary);
         border-color: var(--color-primary);
     }
-    
+
     .form-check-input:checked::after {
         content: '';
         position: absolute;
@@ -222,18 +222,18 @@
         left: 4px;
         transform: rotate(45deg);
     }
-    
+
     .form-check-input:focus {
         border-color: var(--color-primary);
         box-shadow: 0 0 0 0.2rem rgba(242, 101, 34, 0.25);
     }
-    
+
     .form-check-label {
         font-weight: 400;
         margin-bottom: 0;
         cursor: pointer;
     }
-    
+
     /* Кнопки */
     .btn {
         font-weight: 500;
@@ -242,48 +242,48 @@
         cursor: pointer;
         transition: all 0.3s ease;
     }
-    
+
     .btn-primary {
         background-color: var(--color-primary);
         border: none;
         color: white;
     }
-    
+
     .btn-primary:hover {
         background-color: #e06328;
     }
-    
+
     .btn-secondary {
         background-color: #6c757d;
         border: none;
         color: white;
     }
-    
+
     .btn-secondary:hover {
         background-color: #5a6268;
     }
-    
+
     /* Выравнивание секций карт */
     .card-body .card {
         box-shadow: 0 1px 5px rgba(0,0,0,0.03);
     }
-    
+
     .card-body .card-header {
         padding: 10px 15px;
         font-weight: 500;
     }
-    
+
     .card-body .card-body {
         padding: 15px;
         max-height: 200px;
         overflow-y: auto;
     }
-    
+
     @media (max-width: 768px) {
         .row {
             flex-direction: column;
         }
-        
+
         .col-md-6 {
             width: 100%;
         }
@@ -294,7 +294,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const isGlobalCheckbox = document.getElementById('is_global');
         const targetSection = document.getElementById('target-section');
-        
+
         isGlobalCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 targetSection.classList.add('d-none');
@@ -302,14 +302,14 @@
                 targetSection.classList.remove('d-none');
             }
         });
-        
+
         // Добавляем стили для отображения чекбоксов в соответствии с их состоянием
         const checkboxes = document.querySelectorAll('.form-check-input');
         checkboxes.forEach(checkbox => {
             if (checkbox.checked) {
                 checkbox.classList.add('checked');
             }
-            
+
             checkbox.addEventListener('change', function() {
                 if (this.checked) {
                     this.classList.add('checked');
@@ -320,4 +320,4 @@
         });
     });
 </script>
-@endsection 
+@endsection

@@ -45,7 +45,7 @@
     </div>
 
     <div class="hr-leave-requests__filters">
-        <form class="hr-leave-requests__filter-form ui-filter-bar">
+        <form class="hr-leave-requests__filter-form">
             @if(request('type'))
                 <input type="hidden" id="type" name="type" value="{{ request('type') }}">
             @endif
@@ -79,7 +79,7 @@
             </div>
             
             <div class="hr-leave-requests__filter-actions">
-                <div class="ui-filter-actions"><button type="submit" class="ui-button"><x-icon name="search"/>Найти</button><a href="{{ route('hr.leave_requests.index') }}" class="ui-button ui-button--secondary">Сбросить</a></div>
+                <div class="original-filter-actions"><button type="submit" class="btn"><x-icon name="search"/>Найти</button><a href="{{ route('hr.leave_requests.index') }}" class="hr-leave-requests__filter-reset">Сбросить</a></div>
             </div>
         </form>
     </div>

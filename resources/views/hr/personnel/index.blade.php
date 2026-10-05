@@ -16,7 +16,7 @@
             </a>
         </div>
         
-        <form method="GET" action="{{ route('hr.personnel.index') }}" class="personnel__filters ui-filter-bar">
+        <form method="GET" action="{{ route('hr.personnel.index') }}" class="personnel__filters">
             <div class="personnel__filter-group">
                 <label for="filterDepartment" class="personnel__filter-label">Отдел:</label>
                 <select id="filterDepartment" name="department" class="personnel__filter-select">
@@ -44,7 +44,7 @@
                 <input type="text" id="filterName" name="name" value="{{ request('name') }}" class="personnel__filter-input" placeholder="Введите имя...">
             </div>
             
-            <div class="ui-filter-actions"><button type="submit" class="ui-button"><x-icon name="search"/>Найти</button><a href="{{ route('hr.personnel.index') }}" class="ui-button ui-button--secondary">Сбросить</a></div>
+            <div class="original-filter-actions"><button type="submit" class="btn"><x-icon name="search"/>Найти</button><a href="{{ route('hr.personnel.index') }}" class="personnel__filter-reset">Сбросить</a></div>
         </form>
         
         <div id="noResultsMessage" class="personnel__no-results" style="display: none;">

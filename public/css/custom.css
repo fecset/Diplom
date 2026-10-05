@@ -1,0 +1,1441 @@
+/* Custom Styles for АО «Цифровая сталь» */
+
+/* Основные цвета и переменные */
+:root {
+    --color-primary: #F37032;      /* Оранжевый основной */
+    --color-accent: #F04C2F;       /* Оранжевый акцентный */
+    --color-black: #010101;
+    --color-dark-gray: #242424;
+    --color-medium-gray: #757575;  /* Средне-серый для текста */
+    --color-light-gray: #e0e0e0;   /* Светло-серый для границ */
+    --color-white: #FFF;
+    --color-background: #f1f1f1;
+    --color-success: #4CAF50;     /* Зеленый для успеха */
+    --color-error: #D32F2F;       /* Красный для ошибок (более насыщенный) */
+
+    --font-family-base: 'Roboto', Arial, sans-serif;
+    --font-size-base: 16px;
+    --line-height-base: 1.6;
+    --border-radius-base: 4px; /* Небольшое скругление, можно убрать (0px) для остроты */
+    --spacing-unit: 1rem; /* 16px */
+}
+
+
+/* Общие стили */
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+    color: var(--color-dark-gray);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    min-height: 100%;
+}
+
+.container {
+    width: 95%;
+    max-width: 1600px; /* Немного уже стандартного Bootstrap */
+    margin: calc(var(--spacing-unit) * 1) auto;
+    padding: calc(var(--spacing-unit) * 1.5);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-base);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Навигация */
+nav {
+    background-color: var(--color-black);
+    padding: var(--spacing-unit) 0;
+    border-bottom: 3px solid var(--color-primary);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--spacing-unit); /* Используем переменную */
+    margin: 0 auto;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+nav .app-name a {
+    color: var(--color-white);
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    transition: color 0.18s, text-shadow 0.18s;
+}
+
+nav .app-name a:hover {
+    color: var(--color-primary);
+    text-shadow: 0 1px 8px rgba(243, 112, 50, 0.10);
+}
+
+nav .auth-links a {
+    color: var(--color-white);
+    margin-left: var(--spacing-unit);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-base);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+nav .auth-links a:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+nav .auth-links span {
+    color: var(--color-light-gray);
+    margin-right: var(--spacing-unit);
+}
+
+/* Заголовки */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-base); /* Можно другой для акцента, если есть */
+    color: var(--color-black);
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 0.75);
+    font-weight: 600;
+}
+
+h1 { font-size: 2.25rem; }
+/* ... другие заголовки по необходимости ... */
+
+/* Формы */
+.form-group {
+    margin-bottom: calc(var(--spacing-unit) * 1.25);
+}
+
+label {
+    display: block;
+    margin-bottom: calc(var(--spacing-unit) * 0.4);
+    font-weight: 600; /* Жирнее */
+    color: var(--color-dark-gray);
+    font-size: 0.9rem;
+}
+
+input[type='email'],
+input[type='password'],
+input[type='text'] {
+    width: 100%;
+    box-sizing: border-box; /* Важно для width: 100% */
+    padding: calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 0.75);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--color-dark-gray);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-base);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='text']:focus {
+    border-color: var(--color-primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.15rem rgba(243, 112, 50, 0.2);
+}
+
+input[type='checkbox'] {
+    margin-right: calc(var(--spacing-unit) * 0.3);
+    vertical-align: middle;
+}
+.form-group input[type='checkbox'] + label {
+    display: inline-block; /* Чтобы лейбл был рядом с чекбоксом */
+    font-weight: normal;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.invalid-feedback strong {
+    display: block;
+    width: 100%;
+    margin-top: calc(var(--spacing-unit) * 0.25);
+    font-size: 0.875em;
+    color: var(--color-error);
+}
+
+/* Кнопки */
+button, .btn {
+    display: inline-block;
+    font-weight: 600; /* Жирнее */
+    color: var(--color-white);
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    padding: calc(var(--spacing-unit) * 0.6) calc(var(--spacing-unit) * 1.25);
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius-base);
+    text-decoration: none;
+    transition: background-color .15s ease-in-out, border-color .15s ease-in-out, transform 0.1s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-white);
+    transform: translateY(-1px);
+}
+
+button:active, .btn:active {
+    transform: translateY(0);
+}
+
+/* Уведомления (Alerts) */
+.alert {
+    padding: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-base);
+    position: relative;
+    border-left-width: 4px;
+}
+
+.alert strong {
+    font-weight: 600;
+}
+
+.alert-danger {
+    color: var(--color-error);
+    background-color: rgba(211, 47, 47, 0.1);
+    border-left-color: var(--color-error);
+}
+
+.alert-success {
+    color: #388E3C; /* Темнее для текста */
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left-color: var(--color-success);
+}
+
+.alert ul {
+    padding-left: calc(var(--spacing-unit) * 1.25);
+    margin-top: calc(var(--spacing-unit) * 0.5);
+    margin-bottom: 0;
+    list-style-type: disc; /* Или none, если не нужны маркеры */
+}
+
+/* Дополнительные стили для основного контента, если отступы нужны */
+main {
+    padding-top: var(--spacing-unit);
+    padding-bottom: var(--spacing-unit);
+}
+
+/* --- AUTH FORM (БЭМ) --- */
+.auth {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-background);
+}
+
+.auth__card {
+    background: var(--color-white);
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(16, 16, 16, 0.10), 0 1.5px 4px rgba(243, 112, 50, 0.08);
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    width: 100%;
+    max-width: 550px;
+    border: 1.5px solid var(--color-light-gray);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    position: relative;
+}
+
+.auth__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+.auth__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.auth__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    position: relative;
+}
+
+.auth__input-wrap {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.auth__icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    pointer-events: none;
+    opacity: 0.85;
+    z-index: 2;
+}
+
+.auth__input {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.3rem;
+    font-size: 1.02rem;
+    color: var(--color-black);
+    background: var(--color-background);
+    border: 1.2px solid var(--color-light-gray);
+    border-radius: 7px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-shadow: none;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.auth__input:focus {
+    border-color: var(--color-primary);
+    background: #fff7f3;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.10);
+}
+
+.auth__checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.2em;
+}
+
+.auth__checkbox {
+    accent-color: var(--color-primary);
+    width: 1.1em;
+    height: 1.1em;
+    margin: 0;
+}
+
+.auth__checkbox-label {
+    font-size: 0.97rem;
+    color: var(--color-medium-gray);
+    font-weight: 500;
+    user-select: none;
+    margin-bottom: 0;
+}
+
+.auth__submit {
+    width: 100%;
+    padding: 0.8rem 0;
+    font-size: 1.08rem;
+    font-weight: 700;
+    border-radius: 7px;
+    background-color: var(--color-primary);
+    border: none;
+    color: var(--color-white);
+    box-shadow: 0 2px 8px rgba(243, 112, 50, 0.08);
+    letter-spacing: 0.03em;
+    transition: background-color 0.18s, box-shadow 0.18s, transform 0.1s, color 0.18s;
+    cursor: pointer;
+}
+.auth__submit:hover {
+    background-color: var(--color-accent);
+    box-shadow: 0 4px 16px rgba(243, 112, 50, 0.13);
+    transform: translateY(-1px) scale(1.01);
+}
+
+.auth__alert {
+    margin-bottom: 0.7rem;
+    border-radius: 8px;
+    border-left-width: 5px;
+    font-size: 1rem;
+}
+
+.auth__error strong {
+    color: var(--color-error);
+    font-size: 0.97em;
+    margin-top: 0.3em;
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .auth__card {
+        padding: 1rem 0.3rem 1rem 0.3rem;
+        max-width: 98vw;
+    }
+}
+
+/* Скрываем стандартный .container для auth */
+.auth-wrapper > .container {
+    display: none;
+}
+
+/* --- LAYOUT & SIDEBAR --- */
+.layout {
+    display: flex;
+    min-height: calc(100vh - 80px);
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    min-width: 250px;
+    background-color: var(--color-black);
+    color: #FFF;
+    border-right: 2px solid #F37032;
+    position: fixed;
+    top: 70px; /* Высота header + padding */
+    left: 0;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    z-index: 900;
+    padding: 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.layout__main {
+    flex: 1;
+    padding: var(--spacing-unit);
+    overflow-x: hidden;
+    margin-left: 250px; /* Должно соответствовать ширине сайдбара */
+    transition: margin-left 0.3s ease;
+    width: calc(100% - 250px);
+}
+
+.sidebar__nav {
+    width: 100%;
+    padding: 2.2rem 0;
+}
+
+.sidebar__list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar__item {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--color-white);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar__link svg {
+    margin-right: 10px;
+    color: var(--color-white);
+    transition: color 0.2s ease;
+}
+
+.sidebar__link:hover, .sidebar__link:focus {
+    background-color: rgba(243, 112, 50, 0.2);
+    color: var(--color-primary);
+}
+
+.sidebar__link:hover svg, .sidebar__link:focus svg {
+    color: var(--color-primary);
+}
+
+.sidebar__link.active {
+    background-color: rgba(243, 112, 50, 0.25);
+    color: var(--color-primary);
+    font-weight: 600;
+    border-left: 3px solid var(--color-primary);
+    padding-left: calc(1.5rem - 3px);
+}
+
+.sidebar__link.active svg {
+    color: var(--color-primary);
+    margin-left: -3px; /* Компенсируем смещение из-за бордера */
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 70px;
+        height: calc(100vh - 70px);
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .layout__main {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    nav .container {
+        padding-left: 50px; /* Место для кнопки меню */
+    }
+    
+    nav .app-name a {
+        font-size: 1.4rem;
+    }
+    
+    /* Корректировка контейнера */
+    .container {
+        width: 95%;
+        padding: calc(var(--spacing-unit) * 1);
+    }
+}
+
+/* --- PROFILE (Личный кабинет) --- */
+.profile {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2.5rem 0;
+}
+
+.profile__card {
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(36,36,36,0.07);
+    padding: 2.2rem 2.5rem 2rem 2.5rem;
+    min-width: 340px;
+    max-width: 543px;
+    width: 100%;
+    border: 1.5px solid var(--color-light-gray);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.5px;
+    text-align: left;
+}
+
+.profile__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.profile__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.04rem;
+    padding: 0.3em 0;
+    border-bottom: 1px solid var(--color-light-gray);
+}
+.profile__row:last-child {
+    border-bottom: none;
+}
+
+.profile__label {
+    color: var(--color-medium-gray);
+    font-weight: 500;
+    min-width: 110px;
+}
+
+.profile__value {
+    color: var(--color-black);
+    font-weight: 600;
+    text-align: right;
+}
+
+.profile__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    justify-content: flex-end;
+}
+
+.profile__btn {
+    padding: 0.6em 1.3em;
+    font-size: 1.01rem;
+    border-radius: 7px;
+    font-weight: 600;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 6px rgba(243, 112, 50, 0.07);
+    text-decoration: none;
+    cursor: pointer;
+}
+.profile__btn:hover {
+    background: var(--color-accent);
+    color: var(--color-white);
+}
+
+@media (max-width: 600px) {
+    .profile__card {
+        padding: 1.1rem 0.5rem 1.1rem 0.5rem;
+        min-width: 0;
+        max-width: 98vw;
+    }
+    .profile {
+        padding: 1rem 0;
+    }
+}
+
+/* --- LEAVE REQUESTS --- */
+.requests {
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(36,36,36,0.07);
+    padding: 2rem 2.2rem 2.2rem 2.2rem;
+    border: 1.5px solid var(--color-light-gray);
+}
+.requests__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+.requests__title {
+    flex: 1 1 auto;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0;
+}
+.requests__btn {
+    padding: 0.5em 1.1em;
+    font-size: 1.01rem;
+    border-radius: 7px;
+    font-weight: 600;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 6px rgba(243, 112, 50, 0.07);
+    text-decoration: none;
+    cursor: pointer;
+    margin-left: 0.5em;
+}
+.requests__btn:hover {
+    background: var(--color-accent);
+    color: var(--color-white);
+}
+.requests__table-wrap {
+    overflow-x: auto;
+}
+.requests__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.01rem;
+    background: var(--color-white);
+}
+.requests__table th, .requests__table td {
+    padding: 0.7em 0.8em;
+    border-bottom: 1px solid var(--color-light-gray);
+    text-align: left;
+}
+.requests__table th {
+    background: #f7f7f7;
+    color: var(--color-dark-gray);
+    font-weight: 600;
+}
+.requests__status {
+    padding: 0.2em 0.7em;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.98em;
+    display: inline-block;
+}
+.requests__status--new {
+    background: #fff3e0;
+    color: var(--color-primary);
+}
+.requests__status--approved {
+    background: #e0f7e9;
+    color: #388E3C;
+}
+.requests__status--rejected {
+    background: #ffeaea;
+    color: var(--color-error);
+}
+
+/* --- REQUEST FORM --- */
+.request-form {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2.5rem 0;
+}
+.request-form__card {
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(36,36,36,0.07);
+    padding: 2.2rem 2.5rem 2rem 2.5rem;
+    min-width: 340px;
+    max-width: 420px;
+    width: 100%;
+    border: 1.5px solid var(--color-light-gray);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.request-form__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.5px;
+    text-align: left;
+}
+.request-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+.request-form__field label {
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: var(--color-dark-gray);
+    margin-bottom: 0.3rem;
+    display: block;
+}
+.request-form__field input[type='date'],
+.request-form__field input[type='text'] {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 1.02rem;
+    color: var(--color-black);
+    background: var(--color-background);
+    border: 1.2px solid var(--color-light-gray);
+    border-radius: 7px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-shadow: none;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+.request-form__field input:focus {
+    border-color: var(--color-primary);
+    background: #fff7f3;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.10);
+}
+.request-form__actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.2rem;
+    justify-content: flex-end;
+}
+.request-form__btn {
+    padding: 0.6em 1.3em;
+    font-size: 1.01rem;
+    border-radius: 7px;
+    font-weight: 600;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 6px rgba(243, 112, 50, 0.07);
+    text-decoration: none;
+    cursor: pointer;
+}
+.request-form__btn:hover {
+    background: var(--color-accent);
+    color: var(--color-white);
+}
+.btn--gray {
+    background: #e0e0e0 !important;
+    color: var(--color-dark-gray) !important;
+}
+.btn--gray:hover {
+    background: #bdbdbd !important;
+    color: var(--color-black) !important;
+}
+@media (max-width: 600px) {
+    .requests, .request-form__card {
+        padding: 1.1rem 0.5rem 1.1rem 0.5rem;
+        min-width: 0;
+        max-width: 98vw;
+    }
+    .requests__header, .request-form {
+        flex-direction: column;
+        gap: 0.7rem;
+        align-items: stretch;
+    }
+}
+
+/* --- ATTENDANCE TABLE (ТАБЕЛЬ) --- */
+.attendance {
+    margin: 0 auto;
+    max-width: 100vw;
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(36,36,36,0.07);
+    padding: 2rem 2.2rem 2.2rem 2.2rem;
+    border: 1.5px solid var(--color-light-gray);
+}
+.attendance__header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+.attendance__title {
+    flex: 1 1 auto;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-black);
+    margin: 0;
+}
+.attendance__period-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.attendance__period-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+.attendance__period-input {
+    width: 100%;
+    padding: calc(var(--spacing-unit)* 0.8) calc(var(--spacing-unit)* 0.75);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    appearance: none;
+    background-color: #fff;
+}
+
+.attendance__period-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.2);
+}
+
+.attendance__period-btn {
+    background-color: #F37032;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(243, 112, 50, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.attendance__table-outer {
+    width: 100%;
+    overflow-x: auto;
+    position: relative;
+    padding-bottom: 12px;
+    overflow-y: auto;
+    height: auto;
+    max-height: 750px;
+    border-bottom: 1px solid var(--color-light-gray);
+}
+
+.attendance__table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.98rem;
+}
+
+/* Стили для всех ячеек таблицы */
+.attendance__table td, 
+.attendance__table th {
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+    padding: 0.5em 0.5em;
+    border-bottom: 1px solid var(--color-light-gray);
+    text-align: center;
+    background-color: var(--color-white); /* Светлый фон для обычных ячеек */
+}
+
+/* Стили для всех заголовков */
+.attendance__table th {
+    background: #f7f7f7;
+    color: #555;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Стили для sticky-колонок */
+.attendance__sticky-col {
+    position: sticky;
+    z-index: 3;
+    border-right: none;
+}
+
+/* Все sticky-ячейки (заголовки и обычные) имеют серый фон */
+th.attendance__sticky-col,
+td.attendance__sticky-col {
+    background: #f0f0f0; /* Серый фон для всех sticky-ячеек */
+}
+
+/* Общие стили для sticky-колонок */
+.attendance__sticky-col--name {
+    /* left устанавливается через JavaScript */
+    width: 160px;
+}
+
+.attendance__sticky-col--pos {
+    /* left устанавливается через JavaScript */
+    width: 160px;
+}
+
+.attendance__sticky-col--dep {
+    /* left устанавливается через JavaScript */
+    width: 160px;
+    box-shadow: 7px 0 9px -7px rgba(0,0,0,0.1); /* Мягкая тень справа для визуального отделения */
+}
+
+/* Только заголовки sticky-колонок имеют еще более темный фон */
+th.attendance__sticky-col { 
+    background: #e6e6e6; /* Более темный фон для заголовков */
+    z-index: 4;
+    font-weight: 700;
+}
+
+/* Стили для статусов посещаемости */
+.attendance__status {
+    display: inline-block;
+    padding: 0.3em 0.7em;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.97em;
+    min-width: 100px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Улучшенные цвета для разных статусов */
+.attendance__status--present { 
+    background: #c7f0d2; 
+    color: #1b5e20; 
+}
+
+.attendance__status--absent { 
+    background: #ffcdd2; 
+    color: #b71c1c; 
+}
+
+.attendance__status--vacation { 
+    
+    background: #d1d9ff; 
+    color: #1a237e; 
+}
+
+.attendance__status--sick_leave, 
+.attendance__status--sick { 
+    background: #ffe0b2; 
+    
+    color: #e65100; 
+}
+
+.attendance__status--empty { 
+    color: var(--color-medium-gray);
+    background: #f9f9f9;
+    border: 1px dashed #e0e0e0;
+}
+
+/* Заливка фона ячеек соответствующим цветом */
+.attendance__cell--present {
+    background-color: rgba(199, 240, 210, 0.45) !important;
+}
+
+.attendance__cell--absent {
+    background-color: rgba(255, 205, 210, 0.45) !important;
+}
+
+.attendance__cell--vacation {
+    background-color: rgba(209, 217, 255, 0.45) !important;
+}
+
+.attendance__cell--sick_leave,
+.attendance__cell--sick {
+    background-color: rgba(255, 224, 178, 0.45) !important;
+
+}
+
+/* Выделение ячеек с комментариями */
+.attendance__cell--with-comment {
+    position: relative;
+}
+
+.attendance__cell--with-comment::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-primary);
+    border-radius: 50%;
+}
+
+.attendance__cell-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+    align-items: center;
+    width: 100%;
+}
+
+.attendance__status-select {
+    width: 100%;
+    font-size: 0.98em;
+    border-radius: 6px;
+    border: 1px solid var(--color-light-gray);
+    padding: 0.3em 0.5em;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23757575' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5em center;
+    background-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-weight: 500;
+}
+
+.attendance__status-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.15);
+}
+
+.attendance__comment-input {
+    width: 100%;
+    font-size: 0.97em;
+    border-radius: 6px;
+    border: 1px solid var(--color-light-gray);
+    padding: 0.3em 0.5em;
+    margin-top: 0.1em;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.attendance__comment-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.15);
+}
+
+.attendance__save-btn {
+    margin-top: 0.3em;
+    font-size: 1em;
+    padding: 0.3em 0.6em;
+    border-radius: 6px;
+    background: #e0e0e0;
+    color: var(--color-dark-gray);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attendance__save-btn:hover {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.attendance__comment {
+    margin-left: 0.2em;
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .attendance__table td, 
+    .attendance__table th {
+        width: 90px;
+        min-width: 90px;
+        max-width: 90px;
+        font-size: 0.92em;
+        padding: 0.3em 0.2em;
+    }
+    .attendance {
+        padding: 1rem 0.3rem 1.2rem 0.3rem;
+    }
+    .attendance__sticky-col--name { width: 90px; }
+    .attendance__sticky-col--pos { width: 90px; }
+    .attendance__sticky-col--dep { width: 90px; box-shadow: 7px 0 9px -7px rgba(0,0,0,0.1); }
+}
+
+/* Wrapper для полноэкранных страниц (табель) */
+.wrapper {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+}
+
+/* Специальный контейнер для табеля */
+.attendance-container {
+    width: 95%;
+    max-width: 1600px; /* Намного шире стандартного контейнера */
+    margin: calc(var(--spacing-unit) * 1) auto;
+    padding: calc(var(--spacing-unit) * 1.5);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-base);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Стилизация полосы прокрутки */
+/* Для Webkit браузеров (Chrome, Safari, новые версии Edge) */
+.attendance__table-outer::-webkit-scrollbar {
+    height: 8px; /* Высота полосы прокрутки */
+    width: 8px;  /* Ширина полосы прокрутки */
+}
+
+.attendance__table-outer::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Фон дорожки */
+    border-radius: 4px;
+}
+
+.attendance__table-outer::-webkit-scrollbar-thumb {
+    background: var(--color-primary); /* Основной оранжевый цвет */
+    border-radius: 4px;
+    transition: background 0.18s;
+}
+
+.attendance__table-outer::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent); /* Акцентный оранжевый при наведении */
+}
+
+/* Для Firefox */
+.attendance__table-outer {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) #f1f1f1;
+}
+
+/* Стилизация прокрутки для всего приложения */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) #f1f1f1;
+}
+
+*::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+    transition: background 0.18s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
+
+/* Стили для фильтров и сортировки */
+.attendance__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.attendance__filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 180px;
+}
+
+.attendance__filter-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.attendance__filter-select,
+.attendance__filter-input {
+    width: 100%;
+    padding: calc(var(--spacing-unit)* 0.8) calc(var(--spacing-unit)* 0.75);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    appearance: none;
+    background-color: #fff;
+}
+
+.attendance__filter-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23757575' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 12px;
+    padding-right: 2rem;
+}
+
+.attendance__filter-select--narrow {
+    min-width: 110px;
+    width: auto;
+}
+
+.attendance__filter-select:focus,
+.attendance__filter-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(243, 112, 50, 0.15);
+}
+
+.attendance__filter-reset {
+    padding: 0.6rem 1rem;
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.attendance__sort-icon {
+    display: inline-block;
+    margin-left: 0.3rem;
+    font-size: 0.9rem;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.attendance__sort-icon--active {
+    opacity: 1;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.attendance__sticky-col {
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .attendance__filters {
+        flex-direction: column;
+        padding: 0.8rem;
+    }
+    
+    .attendance__filter-group {
+        width: 100%;
+    }
+    
+    .attendance__filter-reset {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Стиль для сообщения об отсутствии результатов */
+.attendance__no-results {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
+
+
+/* Фиксируем шапку таблицы при вертикальной прокрутке */
+.attendance__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f7f7f7;
+}
+
+/* Обеспечиваем правильное отображение sticky-заголовков */
+.attendance__table th.attendance__sticky-col {
+    z-index: 5; /* Должно быть больше, чем у обычных заголовков */
+}
+
+/* Стили для управления мобильным меню */
+body.menu-open {
+    overflow: hidden;
+}
+
+/* Кнопка мобильного меню по умолчанию скрыта */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 18px;
+    left: 15px;
+    z-index: 1001;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 10px;
+}
+
+.mobile-menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--color-white);
+    margin: 5px 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Стили для управления мобильным меню */
+body.menu-open {
+    overflow: hidden;
+}
+
+@media (max-width: 900px) {
+    /* Темный оверлей для мобильного меню */
+    body.menu-open::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 899;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+        pointer-events: all;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 70px;
+        height: calc(100vh - 70px);
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .layout__main {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    nav .container {
+        padding-left: 50px;
+    }
+    
+    nav .app-name a {
+        font-size: 1.4rem;
+    }
+    
+    /* Корректировка контейнера */
+    .container {
+        width: 95%;
+        padding: calc(var(--spacing-unit) * 1);
+    }
+} 
+
+.leave-request-card__type--business_trip {
+    background-color: #9C27B0;
+}
+
+.attendance__status--business_trip {
+    background: #e1bee7;
+    color: #4a148c;
+}
+
+.attendance__cell--business_trip {
+    background-color: rgba(225, 190, 231, 0.45) !important;
+}
+
+/* Стили для кнопок в личном кабинете */
+.vacation-info__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vacation-info__buttons .btn {
+    align-self: stretch;
+    text-align: center;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn--business-trip {
+    background-color: #9C27B0;
+    color: white;
+}
+
+.btn--business-trip:hover {
+    background-color: #7B1FA2;
+} 

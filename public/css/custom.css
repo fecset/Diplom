@@ -1447,3 +1447,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .review-scroll{overflow:auto}.review-table{width:100%;border-collapse:collapse;margin:20px 0}.review-table th,.review-table td{padding:12px;border:1px solid #ddd;text-align:left}.review-table th{background:#f7f7f7}
 .attendance-grid td{padding:3px;text-align:center}.attendance-edit{border:0;background:transparent;min-width:36px;min-height:36px;cursor:pointer}.attendance-status-vacation{background:#fff2c8}.attendance-status-sick_leave{background:#ffe1e1}.attendance-status-present{background:#e7f5e7}
 .review-dialog{border:1px solid #ddd;border-radius:12px;padding:24px;max-width:min(750px,90vw);max-height:85vh;overflow:auto}.review-dialog::backdrop{background:#0008}.notification-dialog{width:700px}.notification-dialog>button{margin:0 10px 10px 0}.notification-item__text{white-space:pre-wrap;overflow-wrap:anywhere}
+.notification-item>button{align-self:center;flex:0 0 auto;padding:8px 12px}.notification-item__content{min-width:0}
+.attendance-grid th:first-child{position:sticky;left:0;z-index:1;background:#f7f7f7;min-width:160px}

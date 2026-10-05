@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
     const trigger=document.getElementById('notificationsIcon'), badge=document.getElementById('notificationsBadge');
     if(!trigger)return;
+    document.getElementById('showAllNotifications')?.addEventListener('click',()=>trigger.click());
     const request=async(url, options={})=>{const response=await fetch(url,{credentials:'same-origin',headers:{'Accept':'application/json',...options.headers},...options});if(!response.ok)throw new Error('Не удалось выполнить запрос.');return response.json();};
     const setBadge=count=>{badge.textContent=String(count);badge.classList.toggle('has-notifications',count>0);trigger.setAttribute('aria-label',`Уведомления: ${count} непрочитанных`);};
     const refresh=async()=>setBadge((await request(trigger.dataset.url)).unread_count);

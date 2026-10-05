@@ -1,5 +1,6 @@
 /* New screens reuse the original personnel/list/form appearance. */
 .ui-icon { flex: 0 0 20px; vertical-align: middle; }
+#app > nav > .container { box-sizing: border-box; width: 100%; }
 .layout__main > .container { box-sizing: border-box; width: 100%; }
 .ui-page {
     background: #fff;

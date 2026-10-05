@@ -35,7 +35,7 @@ class PersonnelWorkflowTest extends TestCase
     {
         $this->get('/attendance')->assertRedirect('/login');
         $user = $this->user();
-        $this->actingAs($user)->get('/attendance')->assertOk()->assertSee('нет отметки', false);
+        $this->actingAs($user)->get('/attendance')->assertOk()->assertSee('Нет отметки', false);
         $this->assertDatabaseCount('attendances', 0);
         $this->get('/hr/personnel')->assertForbidden();
         $this->post('/hr/attendance', ['user_id' => $user->id, 'date' => '2026-11-01', 'status' => 'present'])->assertForbidden();

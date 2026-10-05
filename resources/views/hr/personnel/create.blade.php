@@ -23,7 +23,7 @@
         
         <form action="{{ route('hr.personnel.store') }}" method="POST" class="personnel-form__form">
             @csrf
-            <div class="form-group"><label for="vacationDays">Дней отпуска в календарном году</label><input type="number" class="form-control" id="vacationDays" name="vacation_days_per_year" min="0" max="366" value="{{ old('vacation_days_per_year', 28) }}" required></div>
+            <div class="form-group"><label class="form-label" for="vacationDays">Дней отпуска в календарном году</label><input type="number" class="form-input" id="vacationDays" name="vacation_days_per_year" min="0" max="366" value="{{ old('vacation_days_per_year', 28) }}" required></div>
             
             <div class="form-group">
                 <label for="name" class="form-label">ФИО сотрудника*:</label>

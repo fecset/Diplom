@@ -1439,17 +1439,12 @@ body.menu-open {
 .btn--business-trip:hover {
     background-color: #7B1FA2;
 }
-/* Shared forms, keyboard focus and compact read-only attendance grid. */
-button.mobile-menu-toggle,button.notifications-icon{border:0;background:transparent;color:inherit;font:inherit}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #ca4b15;outline-offset:3px}
-.review-filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:20px 0}
-.review-form{display:grid;gap:12px;max-width:600px}.review-form input,.review-form select{padding:10px;border:1px solid #aaa;border-radius:5px}
-.review-scroll{overflow:auto}.review-table{width:100%;border-collapse:collapse;margin:20px 0}.review-table th,.review-table td{padding:12px;border:1px solid #ddd;text-align:left}.review-table th{background:#f7f7f7}
-.attendance-grid td{padding:3px;text-align:center}.attendance-edit{border:0;background:transparent;min-width:36px;min-height:36px;cursor:pointer}.attendance-status-vacation{background:#fff2c8}.attendance-status-sick_leave{background:#ffe1e1}.attendance-status-present{background:#e7f5e7}
-.review-dialog{border:1px solid #ddd;border-radius:12px;padding:24px;max-width:min(750px,90vw);max-height:85vh;overflow:auto}.review-dialog::backdrop{background:#0008}.notification-dialog{width:700px}.notification-dialog>button{margin:0 10px 10px 0}.notification-item__text{white-space:pre-wrap;overflow-wrap:anywhere}
-.notification-item>button{align-self:center;flex:0 0 auto;padding:8px 12px}.notification-item__content{min-width:0}
-.attendance-grid th:first-child{position:sticky;left:0;z-index:1;background:#f7f7f7;min-width:160px}
-.attendance-edit{color:#242424;padding:0}.notification-item>button{white-space:nowrap}
-.sidebar{top:var(--app-nav-height,70px);height:calc(100dvh - var(--app-nav-height,70px))}.sidebar__nav{position:static}
-@media(max-width:900px){.sidebar:not(.active){visibility:hidden}.sidebar.active{visibility:visible}}
-button.notifications-icon{color:var(--color-white)}button.notifications-icon:hover{color:var(--color-primary)}
+/* Shared keyboard focus and header/sidebar alignment. */
+button.mobile-menu-toggle, button.notifications-icon { border: 0; background: transparent; font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 3px solid #ca4b15; outline-offset: 3px; }
+.sidebar { top: var(--app-nav-height, 70px); height: calc(100dvh - var(--app-nav-height, 70px)); }
+.sidebar__nav { position: static; }
+@media (max-width: 900px) {
+    .sidebar:not(.active) { visibility: hidden; }
+    .sidebar.active { visibility: visible; }
+}

@@ -78,10 +78,15 @@
                 
                 <div id="target-section" class="{{ old('is_global', $notification->is_global) ? 'd-none' : '' }}">
                     <h4 class="mt-4 mb-3">Целевая аудитория</h4>
-                    <label for="targetUsers">Отдельные сотрудники (можно выбрать несколько)</label>
-                    <select id="targetUsers" name="target_users[]" multiple class="form-control">
-                    @foreach($users as $recipient)<option value="{{ $recipient->id }}" @selected(in_array($recipient->id, old('target_users', $notification->target_users ?? [])))>{{ $recipient->name }} ({{ $recipient->username }})</option>@endforeach
-                    </select>
+                    <fieldset class="ui-recipient-panel">
+                        <legend>Отдельные сотрудники</legend>
+                        <p class="ui-field-help">Отметьте одного или нескольких получателей.</p>
+                        <div class="ui-recipient-list">
+                            @forelse($users as $recipient)
+                            <label class="ui-recipient" for="recipient_{{ $recipient->id }}"><input type="checkbox" id="recipient_{{ $recipient->id }}" name="target_users[]" value="{{ $recipient->id }}" @checked(in_array($recipient->id, old('target_users', $notification->target_users ?? [])))><span>{{ $recipient->name }}<small>{{ $recipient->username }}</small></span></label>
+                            @empty<p class="ui-field-help">Нет доступных сотрудников.</p>@endforelse
+                        </div>
+                    </fieldset>
                     
                     <div class="card mb-3">
                         <div class="card-header">Роли пользователей</div>

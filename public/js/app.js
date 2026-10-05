@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const attendance=document.getElementById('attendanceDialog');
     document.querySelectorAll('.attendance-edit').forEach(button=>button.addEventListener('click',()=>{
         for(const field of ['user_id','date','status','comment']) attendance.querySelector(`[name="${field}"]`).value=button.dataset[field==='user_id'?'user':field]||'';
-        document.getElementById('attendanceDialogTitle').textContent=`${button.dataset.name}: ${button.dataset.date}`;
+        document.getElementById('attendanceDialogContext').textContent=`${button.dataset.name} · ${button.dataset.date.split('-').reverse().join('.')}`;
         attendance.showModal();
     }));
     document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
@@ -28,12 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     trigger.addEventListener('click',async()=>{
         const opener=document.activeElement;
         const dialog=element('dialog',undefined,'review-dialog notification-dialog');dialog.setAttribute('aria-labelledby','notificationDialogTitle');
-        const title=element('h2','Уведомления');title.id='notificationDialogTitle';dialog.append(title);
-        const close=element('button','Закрыть');close.type='button';close.addEventListener('click',()=>dialog.close());dialog.append(close);
-        const all=element('button','Прочитать все');all.type='button';dialog.append(all);
-        const status=element('p','Загрузка…');status.setAttribute('role','status');dialog.append(status);
+        const header=element('div',undefined,'ui-dialog-header');const title=element('h2','Уведомления');title.id='notificationDialogTitle';header.append(title);dialog.append(header);
+        const close=element('button','×','ui-icon-button');close.type='button';close.setAttribute('aria-label','Закрыть');close.addEventListener('click',()=>dialog.close());header.append(close);
+        const toolbar=element('div',undefined,'ui-dialog-toolbar');const hint=element('span','Новые сообщения выделены оранжевой полосой.','ui-description');toolbar.append(hint);const all=element('button','Прочитать все','ui-button ui-button--secondary');all.type='button';toolbar.append(all);dialog.append(toolbar);
+        const status=element('p','Загрузка…','ui-dialog-status');status.setAttribute('role','status');dialog.append(status);
         const body=element('div',undefined,'notification-modal__body');dialog.append(body);
-        const more=element('button','Показать ещё');more.type='button';more.hidden=true;dialog.append(more);
+        const more=element('button','Показать ещё','ui-button ui-button--secondary');more.type='button';more.hidden=true;dialog.append(more);
         let next=null;
         const mark=async(ids)=>{await request(trigger.dataset.readUrl,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(ids?{notification_ids:ids}:{})});await refresh();};
         const load=async(url)=>{
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const content=element('div',undefined,'notification-item__content');
                     content.append(element('h3',item.title,'notification-item__title'),element('p',item.message,'notification-item__text'),element('time',new Date(item.created_at).toLocaleString('ru-RU'),'notification-item__date'));
                     article.append(content);
-                    if(!item.is_read){const read=element('button','Прочитать');read.type='button';read.dataset.markRead='true';read.addEventListener('click',async()=>{read.disabled=true;try{await mark([item.id]);article.classList.add('notification-item--read');read.remove();}catch(e){status.textContent=e.message;read.disabled=false;}});article.append(read);}
+                    if(!item.is_read){const read=element('button','Прочитать','ui-button ui-button--secondary ui-button--compact');read.type='button';read.dataset.markRead='true';read.addEventListener('click',async()=>{read.disabled=true;try{await mark([item.id]);article.classList.add('notification-item--read');read.remove();}catch(e){status.textContent=e.message;read.disabled=false;}});article.append(read);}
                     body.append(article);
                 });
                 next=data.next_page_url;more.hidden=!next;status.textContent=body.childElementCount?'':'У вас нет уведомлений.';

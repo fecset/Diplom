@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refresh().catch(()=>{badge.textContent='!';trigger.setAttribute('aria-label','Уведомления: ошибка загрузки');});
     const element=(tag,text,cls)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(cls)node.className=cls;return node;};
     trigger.addEventListener('click',async()=>{
+        const opener=document.activeElement;
         const dialog=element('dialog',undefined,'review-dialog notification-dialog');dialog.setAttribute('aria-labelledby','notificationDialogTitle');
         const title=element('h2','Уведомления');title.id='notificationDialogTitle';dialog.append(title);
         const close=element('button','Закрыть');close.type='button';close.addEventListener('click',()=>dialog.close());dialog.append(close);
@@ -47,6 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         more.addEventListener('click',()=>{if(next)load(next);});
         all.addEventListener('click',async()=>{all.disabled=true;try{await mark();body.querySelectorAll('.notification-item').forEach(n=>n.classList.add('notification-item--read'));body.querySelectorAll('[data-mark-read]').forEach(n=>n.remove());}catch(e){status.textContent=e.message;}finally{all.disabled=false;}});
-        dialog.addEventListener('close',()=>{dialog.remove();trigger.focus();});document.body.append(dialog);dialog.showModal();await load(trigger.dataset.url);
+        dialog.addEventListener('close',()=>{dialog.remove();(opener?.isConnected?opener:trigger).focus();});document.body.append(dialog);dialog.showModal();await load(trigger.dataset.url);
     });
 });

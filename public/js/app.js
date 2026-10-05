@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const menu=document.getElementById('menuToggle'), sidebar=document.getElementById('sidebar');
+    const header=document.querySelector('#app > nav');
+    if(header&&sidebar){
+        const alignSidebar=()=>document.documentElement.style.setProperty('--app-nav-height',`${header.getBoundingClientRect().height}px`);
+        alignSidebar();new ResizeObserver(alignSidebar).observe(header);
+    }
     const closeMenu=()=>{sidebar?.classList.remove('active');menu?.classList.remove('active');menu?.setAttribute('aria-expanded','false');document.body.classList.remove('menu-open');};
     menu?.addEventListener('click',()=>{if(!sidebar)return;const open=!sidebar.classList.contains('active');sidebar.classList.toggle('active',open);menu.classList.toggle('active',open);menu.setAttribute('aria-expanded',String(open));document.body.classList.toggle('menu-open',open);});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){const open=sidebar?.classList.contains('active');closeMenu();if(open)menu.focus();}});
     document.addEventListener('click',e=>{if(sidebar&&!sidebar.contains(e.target)&&!menu.contains(e.target))closeMenu();});
     window.addEventListener('resize',()=>{if(window.innerWidth>900)closeMenu();});
     const attendance=document.getElementById('attendanceDialog');

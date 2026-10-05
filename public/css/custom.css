@@ -1450,3 +1450,5 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .notification-item>button{align-self:center;flex:0 0 auto;padding:8px 12px}.notification-item__content{min-width:0}
 .attendance-grid th:first-child{position:sticky;left:0;z-index:1;background:#f7f7f7;min-width:160px}
 .attendance-edit{color:#242424;padding:0}.notification-item>button{white-space:nowrap}
+.sidebar{top:var(--app-nav-height,70px);height:calc(100dvh - var(--app-nav-height,70px))}.sidebar__nav{position:static}
+@media(max-width:900px){.sidebar:not(.active){visibility:hidden}.sidebar.active{visibility:visible}}
